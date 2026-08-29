@@ -19,7 +19,7 @@ namespace TestExcelerWebApi.Controllers
         [HttpPost("import")]
         public IActionResult ImportEmployees(IFormFile file)
         {
-            if (file == null || file.Length == 0) return BadRequest("فایل خالی است.");
+            if (file == null || file.Length == 0) return BadRequest("File is empty");
 
             using var stream = file.OpenReadStream();
 
@@ -51,19 +51,16 @@ namespace TestExcelerWebApi.Controllers
         [HttpPost("import-bulk")]
         public async Task<IActionResult> ImportBulkEmployees(IFormFile file)
         {
-            if (file == null || file.Length == 0) return BadRequest("فایل خالی است.");
+            if (file == null || file.Length == 0) return BadRequest("File is empty");
 
             using var stream = file.OpenReadStream();
 
-            // تعریف متغیرهایی برای گزارش‌گیری و دیدن عملکرد Chunking
             int chunkCounter = 0;
             int totalProcessed = 0;
             var report = new List<object>();
 
-            // فراخوانی متد جدید با chunkSize = 2 برای تست روی فایل کوچک
             var chunkStream = _excelReader.ReadInChunksAsync<EmployeeExcelInput, EmployeeDto>(stream, chunkSize: 2);
 
-            // حلقه نامزامون روی دسته‌های آماده شده
             await foreach (var chunk in chunkStream)
             {
                 chunkCounter++;
@@ -72,10 +69,6 @@ namespace TestExcelerWebApi.Controllers
                 var validData = chunk.Where(x => x.IsValid).Select(x => x.Data).ToList();
                 var invalidRecords = chunk.Where(x => !x.IsValid).Select(x => new { Row = x.RowIndex, Errors = x.Errors }).ToList();
 
-                // در دنیای واقعی اینجا دستور SqlBulkCopy نوشته میشه
-                // await _dbContext.BulkInsertAsync(validData);
-
-                // ما اینجا فقط لاگ می‌کنیم تا رفتار فریم‌ورک رو ببینیم
                 report.Add(new
                 {
                     ChunkNumber = chunkCounter,
@@ -89,7 +82,7 @@ namespace TestExcelerWebApi.Controllers
 
             return Ok(new
             {
-                Message = "پردازش دسته‌ای (Chunking) با موفقیت به پایان رسید.",
+                Message = "Chunk process was successfull",
                 TotalChunks = chunkCounter,
                 TotalRecords = totalProcessed,
                 Details = report

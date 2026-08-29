@@ -34,7 +34,7 @@ namespace TestExcelerWebApi.Controllers
 
             return Ok(new
             {
-                Message = $"پردازش تمام شد. {validData.Count} رکورد سالم، {invalidRows.Count} رکورد دارای خطا",
+                Message = $"Valid Data count :{validData.Count} , Invalid rows : {invalidRows.Count}",
                 ValidData = validData,
                 Errors = invalidRows
             });
@@ -44,11 +44,11 @@ namespace TestExcelerWebApi.Controllers
         {
             var fakeData = new List<DocumentExcelInput>
                 {
-                    new DocumentExcelInput { Id = 1, Type = "رسید", Warehouse = "انبار مرکزی" },
-                    new DocumentExcelInput { Id = 2, Type = "حواله", Warehouse = "انبار قطعات" }
+                    new DocumentExcelInput { Id = 1, Type = "Receipt", Warehouse = "inventory 1" },
+                    new DocumentExcelInput { Id = 2, Type = "invoice", Warehouse = "inventory 2" }
                 };
             var memorystream = new MemoryStream();
-            await _excelWriter.WriteAsync(fakeData , memorystream);
+            await _excelWriter.WriteAsync(fakeData, memorystream);
             memorystream.Position = 0;
             return File(memorystream,
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

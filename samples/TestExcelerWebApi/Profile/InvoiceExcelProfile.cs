@@ -9,30 +9,30 @@ namespace TestExcelerWebApi.Profile
         {
             Map(x => x.Id)
                 .ToColumn(1)
-                .WithHeader("ID")
+                .WithHeader("Id")
                 .IsBold(true)
                 .WithFontColor(System.Drawing.Color.Black);
 
             Map(x => x.Type)
                 .ToColumn(2)
-                .WithHeader("TYPE")
+                .WithHeader("Type")
                 .IsBold(false)
                 .WithBackgroundColor(System.Drawing.Color.Blue);
 
             Map(x => x.DlNumber)
                 .ToColumn(3)
-                .WithHeader("Shomare Tafzil")
+                .WithHeader("DlNumber")
                 .IsBold(false)
                 .WithFontColor(System.Drawing.Color.Beige);
 
             Map(x => x.Deliverer)
                 .ToColumn(4)
-                .WithHeader("Tahvil Dahande")
+                .WithHeader("Deliverer")
                 .IsBold(true);
 
             Map(x => x.DeliveredTime)
                 .ToColumn(5)
-                .WithHeader("ZAMAN TAHVIL !");
+                .WithHeader("DeliveredTime");
         }
     }
 }
