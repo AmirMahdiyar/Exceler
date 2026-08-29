@@ -10,10 +10,10 @@ namespace TestExcelerWebApi.Validators
             var errors = new List<string>();
 
             if (input.Id <= 0)
-                errors.Add("شناسه پرسنل باید یک عدد مثبت باشد.");
+                errors.Add("EmployeeId Must be Positive");
 
             if (string.IsNullOrWhiteSpace(input.FullName))
-                errors.Add("نام و نام‌خانوادگی نمی‌تواند خالی باشد.");
+                errors.Add("Fullname Can't be Null Or Empty");
 
             return errors;
         }

@@ -8,11 +8,11 @@ namespace TestExcelerWebApi.Profile
     {
         public EmployeeExcelProfile()
         {
-            Map(x => x.Id).ToColumn(1).WithHeader("کد");
-            Map(x => x.FullName).ToColumn(2).WithHeader("نام");
+            Map(x => x.Id).ToColumn(1).WithHeader("Id");
+            Map(x => x.FullName).ToColumn(2).WithHeader("Name");
             Map(x => x.HireDate)
                 .ToColumn(3)
-                .WithHeader("تاریخ")
+                .WithHeader("Date")
                 .WithConverter(new PersianDateConverter());
         }
     }

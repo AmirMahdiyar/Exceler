@@ -15,7 +15,7 @@ namespace TestExcelerWebApi.Processor
                 WarehouseName = input.Warehouse,
                 Date = input.Date,
                 Status = input.Status,
-                FullDescription = $"سند شماره {input.Number} - {input.Description}"
+                FullDescription = $"invoice number :{input.Number} - {input.Description}"
             };
         }
     }
