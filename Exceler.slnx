@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/TestExcelerWebApi/TestExcelerWebApi.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Exceler/Exceler.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+</Solution>
