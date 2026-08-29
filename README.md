@@ -132,6 +132,12 @@ public class EmployeesController : ControllerBase
         );
     }
 }
-📄 License
-This project is licensed under the MIT License - see the LICENSE file for details.
-⚠️ EPPlus Licensing Note: Exceler utilizes the industry-proven EPPlus library under the hood for lower-level spreadsheet manipulations. Please note that EPPlus is licensed under the PolyForm Noncommercial License 1.0.0. If you are using Exceler in a commercial/corporate environment, please ensure you comply with the commercial licensing terms of EPPlus.
+```
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+> ⚠️ **EPPlus Licensing Note:** Exceler utilizes the industry-proven **EPPlus** library under the hood for lower-level spreadsheet manipulations. Please note that EPPlus is licensed under the **PolyForm Noncommercial License 1.0.0**. If you are using Exceler in a commercial/corporate environment, please ensure you comply with the commercial licensing terms of EPPlus.
