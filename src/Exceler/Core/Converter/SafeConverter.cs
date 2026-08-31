@@ -1,9 +1,4 @@
 ﻿using Exceler.Core.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Exceler.Core.Converter
 {
@@ -11,25 +6,45 @@ namespace Exceler.Core.Converter
     {
         public static T? ChangeType<T>(object? value)
         {
-            if (value == null || value == DBNull.Value)
+            if (value == null || string.IsNullOrWhiteSpace(value.ToString()))
                 return default;
 
-            if (value is T typedValue)
-                return typedValue;
-
-            Type underlyingType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
+            Type targetType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
 
             try
             {
-                if (underlyingType == typeof(string))
-                    return (T)(object)value.ToString()!;
+                if (targetType == typeof(string)) return (T)(object)value.ToString()!;
 
-                if (underlyingType.IsEnum)
-                    return (T)Enum.Parse(underlyingType, value.ToString()!);
+                if (targetType == typeof(DateTime))
+                {
+                    if (value is double doubleDate) return (T)(object)DateTime.FromOADate(doubleDate);
+                    if (value is DateTime dateValue) return (T)(object)dateValue;
+                    if (DateTime.TryParse(value.ToString(), out DateTime parsedDate)) return (T)(object)parsedDate;
 
-                return (T)Convert.ChangeType(value, underlyingType);
+                    throw new ExcelCastException();
+                }
+
+                if (targetType == typeof(Guid))
+                {
+                    if (Guid.TryParse(value.ToString(), out Guid parsedGuid)) return (T)(object)parsedGuid;
+                    throw new ExcelCastException();
+                }
+
+                if (targetType.IsEnum)
+                {
+                    return (T)Enum.Parse(targetType, value.ToString()!, true);
+                }
+
+                if (targetType == typeof(bool))
+                {
+                    var str = value.ToString()!.Trim().ToLower();
+                    if (str == "1" || str == "yes" || str == "true") return (T)(object)true;
+                    if (str == "0" || str == "no" || str == "false") return (T)(object)false;
+                }
+
+                return (T)Convert.ChangeType(value, targetType);
             }
-            catch
+            catch (Exception)
             {
                 throw new ExcelCastException();
             }

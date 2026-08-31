@@ -10,5 +10,7 @@
   <Folder Name="/src/">
     <Project Path="src/Exceler/Exceler.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
+  <Folder Name="/tests/">
+    <Project Path="tests/Exceler.Tests.Unit/Exceler.Tests.csproj" Id="9db7d4b4-939e-459c-96bd-43d2039d9cc4" />
+  </Folder>
 </Solution>

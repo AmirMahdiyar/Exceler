@@ -1,10 +1,4 @@
 ﻿using Exceler.Core.Exceptions;
-using Exceler.Pipeline.Read;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Exceler.Pipeline.Read.Handlers
 {
@@ -30,7 +24,8 @@ namespace Exceler.Pipeline.Read.Handlers
                 {
                     context.Profile.ColumnHeaders.TryGetValue(setter.Key, out var headerName);
                     var colName = headerName ?? $"Column {setter.Key}";
-                    context.Result.Errors.Add($"Format of [{colName}] Column is incorrect.");
+
+                    context.Result.Errors.Add($"Format of [{colName}] Column is incorrect");
                 }
             }
 
