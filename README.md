@@ -17,7 +17,10 @@ Unlike traditional .NET Excel libraries that load entire files into memory and r
 *   **Startup expression compilation:** Scans and compiles mapping configurations into optimized **Expression Trees** at application startup [1, 2]. Object mapping executes at the speed of handwritten, hard-coded code.
 *   **Fluent & Clean Design:** Eliminates dirty Excel parsing code from your business services. All mappings, header designs, and cell formatting are defined declaratively in clean profile classes [1].
 *   **Production-Ready Pipelines:** Built-in support for strongly-typed value conversion, fail-fast business rule validation, and multi-sheet exports [3-5].
-
+* **Fluent Profile Mapping:** Map C# properties to Excel columns effortlessly using a strongly-typed Fluent API.
+* **Bulletproof Parsing:** Built-in safeguards against corrupt files, invalid cell formats, unexpected nulls, and duplicate headers.
+* **Pipeline Processing:** Chain custom business logic and validations to process rows dynamically as they are read.
+* **Highly Tested:** Backed by a rigorous test suite with 95%+ code coverage handling the most severe edge cases.
 ---
 
 ## 📦 Installation
