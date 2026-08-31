@@ -2,7 +2,7 @@
 
 [![NuGet Version](https://img.shields.io/nuget/v/Exceler.svg?style=flat-square&color=blue)](https://www.nuget.org/packages/Exceler)
 [![Downloads](https://img.shields.io/nuget/dt/Exceler.svg?style=flat-square&color=green)](https://www.nuget.org/packages/Exceler)
-[![Framework](https://img.shields.io/badge/.NET-6.0%20%7C%208.0%20%7C%209.0-purple.svg?style=flat-square)](#)
+[![Framework](https://img.shields.io/badge/.NET-6.0%20%7C%207.0%20%7C%208.0%20%7C%209.0-purple.svg?style=flat-square)](#)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 An ultra-fast, modern, and memory-efficient spreadsheet processing framework for **.NET 6, 7 , 8, and 9**. It encapsulates low-level workbook operations to deliver high-performance importing and exporting through a clean, declarative API.
