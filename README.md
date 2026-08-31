@@ -5,7 +5,7 @@
 [![Framework](https://img.shields.io/badge/.NET-6.0%20%7C%208.0%20%7C%209.0-purple.svg?style=flat-square)](#)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
-An ultra-fast, modern, and memory-efficient spreadsheet processing framework for **.NET 6, 8, and 9**. It encapsulates low-level workbook operations to deliver high-performance importing and exporting through a clean, declarative API.
+An ultra-fast, modern, and memory-efficient spreadsheet processing framework for **.NET 6, 7 , 8, and 9**. It encapsulates low-level workbook operations to deliver high-performance importing and exporting through a clean, declarative API.
 
 ---
 
@@ -35,6 +35,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Automatically registers IExcelReader, IExcelWriter, and scans assemblies for profiles
 builder.Services.AddExcelCore(options =>
 {
+    options.UseNonCommercialLicense();
     options.RegisterFromAssemblyContaining<EmployeeExcelProfile>();
 });
 Step 2: Define Model and Fluent Mapping Profile
