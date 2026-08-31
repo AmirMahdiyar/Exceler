@@ -19,7 +19,10 @@ namespace Exceler.Tests.Infrastructure.Base
             var services = new ServiceCollection();
 
             services.AddExcelCore(builder =>
-                builder.RegisterFromAssemblyContaining<TestModelProfile>());
+            {
+                builder.RegisterFromAssemblyContaining<TestModelProfile>();
+                builder.UseNonCommercialLicense();
+            });
 
             services.AddScoped<IExcelValidator<TestModel>, TestModelValidator>();
 
