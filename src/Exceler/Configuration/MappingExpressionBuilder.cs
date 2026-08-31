@@ -1,12 +1,7 @@
 ﻿using Exceler.Abstractions;
 using Exceler.Core.Converter;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Exceler.Configuration
 {
@@ -49,8 +44,9 @@ namespace Exceler.Configuration
             }
 
             var changeTypeMethod = typeof(SafeConverter)
-                .GetMethod(nameof(SafeConverter.ChangeType))!
-                .MakeGenericMethod(propertyInfo.PropertyType);
+                    .GetMethod(nameof(SafeConverter.ChangeType), BindingFlags.Public | BindingFlags.Static)!
+                    .MakeGenericMethod(propertyInfo.PropertyType);
+
             return Expression.Call(changeTypeMethod, valueParam);
         }
 
