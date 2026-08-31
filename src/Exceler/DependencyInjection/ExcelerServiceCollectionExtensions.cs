@@ -1,13 +1,7 @@
 ﻿using Exceler.Abstractions;
-using Exceler.Configuration;
 using Exceler.Core;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Exceler.DependencyInjection
 {
@@ -37,6 +31,13 @@ namespace Exceler.DependencyInjection
             else
             {
                 builder.RegisterFromAssembly(Assembly.GetCallingAssembly());
+            }
+            if (!builder.IsLicenseConfigured)
+            {
+                throw new InvalidOperationException(
+                    "Exceler uses EPPlus under the hood. You MUST explicitly accept the license terms " +
+                    "by calling either '.UseNonCommercialLicense()' or '.UseCommercialLicense()' " +
+                    "inside the AddExcelCore configuration builder.");
             }
 
             return services;
