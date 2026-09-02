@@ -1,38 +1,29 @@
 name: Exceler CI
 
-# ۱. چه زمانی این ربات بیدار شود؟
 on:
   push:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
 
-# ۲. چه کارهایی (Jobs) انجام دهد؟
 jobs:
   build-and-test:
-    # روی چه سیستم عاملی؟ (اوبونتو سریع‌ترین و ارزان‌ترین است)
     runs-on: ubuntu-latest
 
-    # ۳. مراحل (Steps) انجام کار
     steps:
-    # قدم اول: کدهای شما را از گیت‌هاب دانلود می‌کند
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # قدم دوم: دات‌نت را روی سرور نصب می‌کند (نسخه 9 را تنظیم کردیم)
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '9.0.x'
 
-    # قدم سوم: دانلود پکیج‌ها (مثل EPPlus و FluentAssertions)
     - name: Restore dependencies
       run: dotnet restore
 
-    # قدم چهارم: بیلد کردن پروژه برای اطمینان از نداشتن ارور کامپایل
     - name: Build
       run: dotnet build --no-restore --configuration Release
 
-    # قدم پنجم: ران کردن همان ۲۷ تستی که نوشتیم!
     - name: Run Tests
       run: dotnet test --no-build --configuration Release --verbosity normal

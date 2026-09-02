@@ -11,11 +11,14 @@
 	  <Authors>Amir Mahdiyar</Authors>
 	  <Description>A high-performance, memory-efficient, and pipeline-based Excel reader/writer for .NET applications.</Description>
 	  <PackageTags>excel;epplus;export;import;performance;chunking</PackageTags>
-	  <RepositoryUrl>https://github.com/YourUsername/Exceler</RepositoryUrl>
+	  <RepositoryUrl>https://github.com/AmirMahdiyar/Exceler</RepositoryUrl>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+	<ItemGroup>
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="7.0.2" />
