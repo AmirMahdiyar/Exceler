@@ -23,8 +23,7 @@ jobs:
       run: dotnet restore
 
     - name: Run Tests and Collect Coverage
-      run: dotnet test tests/Exceler.Tests.Unit/Exceler.Tests.csproj --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage"
-      
+      run: dotnet test tests/Exceler.Tests.Unit/Exceler.Tests.csproj --configuration Release --verbosity normal --collect:"XPlat Code Coverage" --logger GitHubActions      
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4
       with:
