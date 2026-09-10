@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Exceler.Pipeline.Write.Handlers
 {
     /// <summary>
     /// Responsible for writing the mapped column headers to the first row of the worksheet and applying default header styling.
     /// </summary>
-    internal class HeaderWriterHandler<TModel> : WriteHandler<TModel> where TModel : class, new()
+    internal class HeaderWriterHandler<TModel> : WriteHandler<TModel> where TModel : class
     {
-        public override void Handle(WriteContext<TModel> context)
+        /// <inheritdoc />
+        public override async Task HandleAsync(WriteContext<TModel> context)
         {
             foreach (var header in context.Profile.ColumnHeaders)
             {
@@ -19,7 +14,8 @@ namespace Exceler.Pipeline.Write.Handlers
                 context.Worksheet.Cells[1, header.Key].Style.Font.Bold = true;
             }
 
-            Next?.Handle(context);
+            if (Next is not null)
+                await Next.HandleAsync(context);
         }
     }
 }

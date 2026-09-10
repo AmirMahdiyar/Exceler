@@ -1,22 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Exceler.Pipeline.Write.Handlers
 {
     /// <summary>
     /// Responsible for applying final worksheet-level configurations, such as Right-To-Left view orientation and column auto-fitting.
     /// </summary>
-    internal class FormattingWriterHandler<TModel> : WriteHandler<TModel> where TModel : class, new()
+    internal class FormattingWriterHandler<TModel> : WriteHandler<TModel> where TModel : class
     {
-        public override void Handle(WriteContext<TModel> context)
+        /// <inheritdoc />
+        public override async Task HandleAsync(WriteContext<TModel> context)
         {
-            context.Worksheet.View.RightToLeft = false;
-            context.Worksheet.Cells[context.Worksheet.Dimension.Address].AutoFitColumns();
+            context.Worksheet.View.RightToLeft = context.Profile.RightToLeft;
 
-            Next?.Handle(context);
+            if (context.Profile.AutoFitColumns && context.Worksheet.Dimension is not null)
+            {
+                context.Worksheet.Cells[context.Worksheet.Dimension.Address].AutoFitColumns();
+            }
+
+            if (Next is not null)
+                await Next.HandleAsync(context);
         }
     }
 }

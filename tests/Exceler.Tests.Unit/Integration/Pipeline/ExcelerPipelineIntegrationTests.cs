@@ -1,5 +1,5 @@
-﻿using Exceler.Tests.Infrastructure.Base;
-using Exceler.Tests.Infrastructure.ModelOfTest;
+using Exceler.Tests.Common.Fixtures;
+using Exceler.Tests.Common.TestDoubles.Models;
 using FluentAssertions;
 
 namespace Exceler.Tests.Integration.Pipeline

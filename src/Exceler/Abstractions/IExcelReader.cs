@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
+using System.Threading;
 
 namespace Exceler.Abstractions
 {
@@ -17,6 +16,7 @@ namespace Exceler.Abstractions
         /// <typeparam name="TInput">The raw model representing a single Excel row.</typeparam>
         /// <typeparam name="TOutput">The final processed model mapped from the input.</typeparam>
         /// <param name="excelStream">The stream containing the Excel file data.</param>
+        /// <param name="sheetName">The optional name of the worksheet to read. If null, the first worksheet is read.</param>
         /// <returns>An enumerable collection of <see cref="ExcelRowResult{TOutput}"/> representing each row's processing status.</returns>
         IEnumerable<ExcelRowResult<TOutput>> Read<TInput, TOutput>(
                 Stream excelStream,
@@ -30,6 +30,7 @@ namespace Exceler.Abstractions
         /// <typeparam name="TOutput">The final processed model mapped from the input.</typeparam>
         /// <param name="excelStream">The stream containing the Excel file data.</param>
         /// <param name="chunkSize">The maximum number of rows to return in a single chunk. Default is 10,000.</param>
+        /// <param name="sheetName">The optional name of the worksheet to read. If null, the first worksheet is read.</param>
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>An asynchronous stream of chunked results, ideal for bulk database insertions.</returns>
         IAsyncEnumerable<List<ExcelRowResult<TOutput>>> ReadInChunksAsync<TInput, TOutput>(
@@ -40,4 +41,3 @@ namespace Exceler.Abstractions
                 where TInput : class, new();
     }
 }
-

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using OfficeOpenXml;
 using System.ComponentModel;
 using System.Reflection;
 
@@ -19,6 +20,11 @@ namespace Exceler.Abstractions
         /// <remarks>This property is used internally by the framework. It is hidden from IntelliSense.</remarks>
         [EditorBrowsable(EditorBrowsableState.Never)]
         bool IsLicenseConfigured { get; }
+
+        /// <summary>
+        /// Gets the configured EPPlus license context, if one has been set.
+        /// </summary>
+        OfficeOpenXml.LicenseContext? LicenseContext { get; }
 
 
         /// <summary>

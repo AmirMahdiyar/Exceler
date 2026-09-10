@@ -2,7 +2,7 @@ name: Exceler CI
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "feature-branch" ]
   pull_request:
     branches: [ "main", "master" ]
 
@@ -22,8 +22,10 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
-
-    - name: Run Tests
-      run: dotnet test --no-build --configuration Release --verbosity normal
+    - name: Run Tests and Collect Coverage
+      run: dotnet test tests/Exceler.Tests.Unit/Exceler.Tests.csproj --configuration Release --verbosity normal --collect:"XPlat Code Coverage"
+      
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}

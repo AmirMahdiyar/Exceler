@@ -2,34 +2,50 @@
 
 [![NuGet Version](https://img.shields.io/nuget/v/Exceler.svg?style=flat-square&color=blue)](https://www.nuget.org/packages/Exceler)
 [![Downloads](https://img.shields.io/nuget/dt/Exceler.svg?style=flat-square&color=green)](https://www.nuget.org/packages/Exceler)
-[![Framework](https://img.shields.io/badge/.NET-6.0%20%7C%208.0%20%7C%209.0-purple.svg?style=flat-square)](#)
+[![Framework](https://img.shields.io/badge/.NET-6.0%20%7C%207.0%20%7C%208.0%20%7C%209.0-purple.svg?style=flat-square)](#)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
-An ultra-fast, modern, and memory-efficient spreadsheet processing framework for **.NET 6, 7 , 8, and 9**. It encapsulates low-level workbook operations to deliver high-performance importing and exporting through a clean, declarative API.
+An ultra-fast, modern, and memory-efficient spreadsheet processing framework for **.NET 6, 7, 8, and 9**. It encapsulates low-level workbook operations to deliver high-performance importing and exporting through a clean, declarative API.
 
 ---
 
 ## ⚡ Why Exceler?
 
-Unlike traditional .NET Excel libraries that load entire files into memory and rely on slow runtime Reflection, **Exceler** is designed for modern, cloud-native enterprise requirements:
+Modern .NET applications frequently struggle with Excel processing due to slow runtime reflection and unnecessary memory allocations from repetitive object transformations. **Exceler** solves these challenges with a clean, cloud-native architecture:
 
-*   **Zero-Allocation Row Chunking:** Uses lazy deferred execution (`IEnumerable` streaming) to read massive Excel files row-by-row, keeping the RAM footprint near-zero and preventing Garbage Collector spikes.
-*   **Startup expression compilation:** Scans and compiles mapping configurations into optimized **Expression Trees** at application startup [1, 2]. Object mapping executes at the speed of handwritten, hard-coded code.
-*   **Fluent & Clean Design:** Eliminates dirty Excel parsing code from your business services. All mappings, header designs, and cell formatting are defined declaratively in clean profile classes [1].
-*   **Production-Ready Pipelines:** Built-in support for strongly-typed value conversion, fail-fast business rule validation, and multi-sheet exports [3-5].
-* **Fluent Profile Mapping:** Map C# properties to Excel columns effortlessly using a strongly-typed Fluent API.
-* **Bulletproof Parsing:** Built-in safeguards against corrupt files, invalid cell formats, unexpected nulls, and duplicate headers.
-* **Pipeline Processing:** Chain custom business logic and validations to process rows dynamically as they are read.
-* **Highly Tested:** Backed by a rigorous test suite with 95%+ code coverage handling the most severe edge cases.
+*   **Zero-Allocation Mapping Pipeline:** Eliminates boxing and runtime reflection by compiling mapping configurations into high-performance **Expression Trees** at application startup. Row mapping executes at the raw speed of handwritten, hard-coded C# code.
+*   **Memory-Conscious Chunking & Streaming:** Employs lazy deferred execution (`IEnumerable` streaming) and asynchronous chunking (`ReadInChunksAsync` via `IAsyncEnumerable`) to deliver processed rows on-demand, preventing large in-memory collections of DTOs and minimizing Garbage Collector (GC) pressure.
+*   **Streaming EF Core Integration:** Directly stream database queries via `IAsyncEnumerable<T>` and the `.ToExcelAsync()` fluent extension without buffering giant lists in RAM with `.ToListAsync()`.
+*   **Fluent & Clean Design:** Eliminates dirty cell-coordinate code from your business services. All mappings, header designs, column widths, and cell formatting are defined declaratively in clean, reusable profile classes.
+*   **Production-Ready Pipelines:** Built-in support for strongly-typed value conversion (`IExcelValueConverter<T>`), asynchronous business rule validation (`IAsyncExcelValidator<T>`), asynchronous domain enrichment (`IAsyncExcelProcessor<TIn, TOut>`), and Right-to-Left (RTL) worksheets.
+*   **Bulletproof Parsing:** Built-in safeguards against corrupt files, formula-based cells, type mismatches, unexpected nulls, and duplicate or missing headers.
+*   **Highly Tested:** Backed by an extensive automated test suite covering complex edge cases with 100% parallel test execution.
+
+---
+
+## 🧠 Architecture & Memory Model: Exceler & EPPlus
+
+To deliver rich spreadsheet capabilities—including high-fidelity styling, formulas, custom palettes, and full OpenXML specification compliance—Exceler builds upon the powerful, industry-standard **EPPlus** engine. Understanding how both layers interact helps you achieve optimal performance:
+
+*   **EPPlus (Document Object Model):** EPPlus is a mature, feature-complete library that operates on an in-memory DOM (`ExcelPackage`). To provide complete workbook manipulation, rich cell formatting, and formula evaluation, EPPlus naturally maintains the workbook structure in memory during read and write operations. This comprehensive DOM model is what enables such deep OpenXML compatibility across Windows, Linux, and Docker environments.
+*   **Exceler (Zero-Allocation Application Layer):** Where traditional approaches incur significant additional memory overhead by allocating intermediate lists, boxing primitive types, and using heavy runtime reflection, Exceler introduces a **Zero-Allocation pipeline** on top of EPPlus. By utilizing Expression Tree compilation, span-based parsing (`ColorHelper`), and streaming row dispatch (`ReadInChunksAsync`), Exceler ensures that your application layer adds virtually zero extra allocations, keeping memory usage predictable and GC pauses minimal even when handling massive datasets.
+
 ---
 
 ## 📦 Installation
 
 ```bash
 dotnet add package Exceler
-🚀 Quick Start
-Implement high-performance spreadsheet import and export in just 4 clean steps.
-Step 1: Register Core Services
+```
+
+---
+
+## 🚀 Quick Start
+
+Implement high-performance spreadsheet import and export in just 4 clean steps:
+
+### Step 1: Register Core Services
+```csharp
 // Program.cs
 using Exceler.DependencyInjection;
 
@@ -41,7 +57,10 @@ builder.Services.AddExcelCore(options =>
     options.UseNonCommercialLicense();
     options.RegisterFromAssemblyContaining<EmployeeExcelProfile>();
 });
-Step 2: Define Model and Fluent Mapping Profile
+```
+
+### Step 2: Define Model and Fluent Mapping Profile
+```csharp
 using Exceler.Configuration;
 
 // The raw model representing the sheet columns
@@ -62,7 +81,10 @@ public class EmployeeExcelProfile : ExcelProfile<EmployeeExcelInput>
         Map(x => x.HireDate).ToColumn(3).WithHeader("Date");
     }
 }
-Step 3: Fast Excel Reading (Lazy Importing)
+```
+
+### Step 3: Fast Excel Reading (Lazy Importing)
+```csharp
 using Exceler.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -82,7 +104,7 @@ public class EmployeesController : ControllerBase
     {
         using var stream = file.OpenReadStream();
         
-        // Lazy-loaded row stream. Avoids storing the whole spreadsheet in memory.
+        // Lazy-loaded row stream. Avoids storing redundant DTO collections in memory.
         var results = _excelReader.Read<EmployeeExcelInput, EmployeeDto>(stream);
 
         foreach (var row in results)
@@ -102,7 +124,10 @@ public class EmployeesController : ControllerBase
         return Ok();
     }
 }
-Step 4: Styled Excel Writing (Exporting)
+```
+
+### Step 4: Styled Excel Writing (Exporting)
+```csharp
 using Exceler.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -126,11 +151,13 @@ public class EmployeesController : ControllerBase
             new() { Id = 2, FullName = "Jane Doe", HireDate = "2026-02-20" }
         };
 
-        // Generates structured, styled Excel file bytes instantly
-        byte[] fileBytes = await _excelWriter.Write(list, sheetName: "Active Employees");
+        // Generates structured, styled Excel file directly to a stream
+        var memoryStream = new MemoryStream();
+        await _excelWriter.WriteAsync(list, memoryStream, sheetName: "Active Employees");
+        memoryStream.Position = 0;
 
         return File(
-            fileBytes, 
+            memoryStream, 
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
             "employees.xlsx"
         );
@@ -138,19 +165,50 @@ public class EmployeesController : ControllerBase
 }
 ```
 
+### Step 5: Streaming Directly from EF Core (`AsAsyncEnumerable`)
+Export millions of database records directly to Excel without buffering them into memory with `.ToListAsync()`:
+
+```csharp
+using Exceler.Abstractions;
+using Exceler.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+[HttpGet("export-stream")]
+public async Task<IActionResult> ExportStream(
+    [FromServices] AppDbContext dbContext,
+    [FromServices] IExcelWriter excelWriter)
+{
+    var memoryStream = new MemoryStream();
+
+    // Stream records row-by-row directly from the database into the Excel workbook!
+    await dbContext.Employees
+        .AsNoTracking()
+        .AsAsyncEnumerable()
+        .ToExcelAsync(excelWriter, memoryStream, sheetName: "Database Stream");
+
+    memoryStream.Position = 0;
+    return File(
+        memoryStream,
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "employees_stream.xlsx"
+    );
+}
+```
+
 ---
 
-## 🛡️ Reliability & Testing
+## 🛡️ Reliability & Enterprise Testing
+
 Exceler is built with enterprise stability in mind. The framework is heavily tested against severe edge cases, including:
 
-*   Missing, empty, or duplicate headers*
+*   **Missing, empty, or duplicate headers**
+*   **Mathematical formulas hiding inside standard cells (calculates automatically)**
+*   **Type-casting failures (safely captures format errors without crashing the pipeline)**
+*   **Complete separation of row failures (one bad row does not abort file processing)**
+*   **Comprehensive test suite running fully in parallel**
 
-*   Mathematical formulas hiding inside standard cells (calculates automatically)
-
-*   Type-casting failures (safely captures format errors without crashing the pipeline)
-
-*   Complete separation of row failures (one bad row does not crash the entire file processing)
-
+---
 
 ## 📄 License
 
@@ -158,7 +216,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 > ⚠️ **EPPlus Licensing Note:** Exceler utilizes the industry-proven **EPPlus** library under the hood for lower-level spreadsheet manipulations. Please note that EPPlus is licensed under the **PolyForm Noncommercial License 1.0.0**. If you are using Exceler in a commercial/corporate environment, please ensure you comply with the commercial licensing terms of EPPlus.
 
+---
 
 ## 🤝 Contributing
-Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
 
+Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
