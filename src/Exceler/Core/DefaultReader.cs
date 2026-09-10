@@ -1,4 +1,4 @@
-﻿using Exceler.Abstractions;
+using Exceler.Abstractions;
 using Exceler.Configuration;
 using Exceler.Core.Exceptions;
 using Exceler.Pipeline.Read;
@@ -21,14 +21,12 @@ namespace Exceler.Core
         public DefaultReader(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         }
 
         public IEnumerable<ExcelRowResult<TOutput>> Read<TInput, TOutput>(Stream excelStream,
             string? sheetName = null) where TInput : class, new()
         {
-            var (profile, processor, validator) = ResolveDependencies<TInput, TOutput>();
+            var (profile, processor, asyncProcessor, validator, asyncValidator) = ResolveDependencies<TInput, TOutput>();
             profile.EnsureBuilt();
 
             using var package = new ExcelPackage(excelStream);
@@ -39,13 +37,18 @@ namespace Exceler.Core
 
             int rowCount = worksheet.Dimension.Rows;
             int colCount = worksheet.Dimension.Columns;
-            var mappedColumns = profile.CompiledSetters.Keys;
+
+            var activeSetters = profile.CompiledSetters
+                .Where(s => s.Key <= colCount)
+                .ToArray();
+
+            if (activeSetters.Length == 0) yield break;
 
             var chain = BuildProcessingChain<TInput, TOutput>();
 
             for (int row = 2; row <= rowCount; row++)
             {
-                if (IsRowEmpty(worksheet, row, mappedColumns, colCount))
+                if (!TryExtractRowValues(worksheet, row, activeSetters, out var rowValues))
                     continue;
 
                 var context = new ReadContext<TInput, TOutput>(row)
@@ -54,7 +57,11 @@ namespace Exceler.Core
                     ColCount = colCount,
                     Profile = profile,
                     Processor = processor,
-                    Validator = validator
+                    AsyncProcessor = asyncProcessor,
+                    Validator = validator,
+                    AsyncValidator = asyncValidator,
+                    ActiveSetters = activeSetters,
+                    RowValues = rowValues
                 };
 
                 chain.Handle(context);
@@ -70,7 +77,7 @@ namespace Exceler.Core
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
             where TInput : class, new()
         {
-            var (profile, processor, validator) = ResolveDependencies<TInput, TOutput>();
+            var (profile, processor, asyncProcessor, validator, asyncValidator) = ResolveDependencies<TInput, TOutput>();
             profile.EnsureBuilt();
 
             using var package = new ExcelPackage();
@@ -83,7 +90,12 @@ namespace Exceler.Core
 
             int rowCount = worksheet.Dimension.Rows;
             int colCount = worksheet.Dimension.Columns;
-            var mappedColumns = profile.CompiledSetters.Keys;
+
+            var activeSetters = profile.CompiledSetters
+                .Where(s => s.Key <= colCount)
+                .ToArray();
+
+            if (activeSetters.Length == 0) yield break;
 
             var currentChunk = new List<ExcelRowResult<TOutput>>(chunkSize);
 
@@ -92,7 +104,8 @@ namespace Exceler.Core
             for (int row = 2; row <= rowCount; row++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (IsRowEmpty(worksheet, row, mappedColumns, colCount))
+
+                if (!TryExtractRowValues(worksheet, row, activeSetters, out var rowValues))
                     continue;
 
                 var context = new ReadContext<TInput, TOutput>(row)
@@ -101,10 +114,14 @@ namespace Exceler.Core
                     ColCount = colCount,
                     Profile = profile,
                     Processor = processor,
-                    Validator = validator
+                    AsyncProcessor = asyncProcessor,
+                    Validator = validator,
+                    AsyncValidator = asyncValidator,
+                    ActiveSetters = activeSetters,
+                    RowValues = rowValues
                 };
 
-                chain.Handle(context);
+                await chain.HandleAsync(context, cancellationToken);
 
                 currentChunk.Add(context.Result);
 
@@ -121,29 +138,61 @@ namespace Exceler.Core
         }
 
         #region Private Methods
-        private (ExcelProfile<TInput>, IExcelProcessor<TInput, TOutput>, IExcelValidator<TInput>?) ResolveDependencies<TInput, TOutput>()
+        private (ExcelProfile<TInput>, IExcelProcessor<TInput, TOutput>?, IAsyncExcelProcessor<TInput, TOutput>?, IExcelValidator<TInput>?, IAsyncExcelValidator<TInput>?) ResolveDependencies<TInput, TOutput>()
             where TInput : class, new()
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             var profile = _serviceProvider.GetRequiredService<ExcelProfile<TInput>>();
-            var processor = _serviceProvider.GetRequiredService<IExcelProcessor<TInput, TOutput>>();
+            var processor = _serviceProvider.GetService<IExcelProcessor<TInput, TOutput>>();
+            var asyncProcessor = _serviceProvider.GetService<IAsyncExcelProcessor<TInput, TOutput>>();
             var validator = _serviceProvider.GetService<IExcelValidator<TInput>>();
-            return (profile, processor, validator);
-        }
-        private bool IsRowEmpty(ExcelWorksheet worksheet, int row, IEnumerable<int> targetColumns, int maxColumn)
-        {
-            foreach (var col in targetColumns)
-            {
-                if (col <= maxColumn)
-                {
-                    var cellValue = worksheet.Cells[row, col].Value;
+            var asyncValidator = _serviceProvider.GetService<IAsyncExcelValidator<TInput>>();
 
-                    if (cellValue != null && !string.IsNullOrWhiteSpace(cellValue.ToString()))
-                        return false;
+            if (processor == null && asyncProcessor == null)
+            {
+                if (typeof(TOutput).IsAssignableFrom(typeof(TInput)))
+                {
+                    var passThrough = new PassThroughProcessor<TInput, TOutput>();
+                    processor = passThrough;
+                    asyncProcessor = passThrough;
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        $"No processor registered for converting '{typeof(TInput).FullName}' to '{typeof(TOutput).FullName}'. " +
+                        $"When input and output types differ, an IExcelProcessor<{typeof(TInput).Name}, {typeof(TOutput).Name}> or IAsyncExcelProcessor<{typeof(TInput).Name}, {typeof(TOutput).Name}> must be implemented and registered in the dependency injection container.");
                 }
             }
 
-            return true;
+            return (profile, processor, asyncProcessor, validator, asyncValidator);
+        }
+        private static bool TryExtractRowValues<TInput>(
+            ExcelWorksheet worksheet,
+            int row,
+            KeyValuePair<int, Action<TInput, object>>[] activeSetters,
+            out object?[] rowValues) where TInput : class, new()
+        {
+            rowValues = new object?[activeSetters.Length];
+            bool hasAnyValue = false;
+
+            for (int i = 0; i < activeSetters.Length; i++)
+            {
+                var val = worksheet.Cells[row, activeSetters[i].Key].Value;
+                if (val != null)
+                {
+                    if (val is string str)
+                    {
+                        if (!string.IsNullOrWhiteSpace(str))
+                            hasAnyValue = true;
+                    }
+                    else
+                    {
+                        hasAnyValue = true;
+                    }
+                }
+                rowValues[i] = val;
+            }
+
+            return hasAnyValue;
         }
         private ExcelWorksheet GetWorksheet(ExcelPackage package, string? sheetName)
         {

@@ -1,9 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Exceler.Abstractions
 {
     /// <summary>
@@ -20,11 +14,11 @@ namespace Exceler.Abstractions
         Task<byte[]> Write<TModel>(
         IEnumerable<TModel> data,
         string? sheetName = null)
-        where TModel : class, new();
+        where TModel : class;
 
         /// <summary>
         /// Generates an Excel file and writes it directly to the provided stream asynchronously.
-        /// This method is highly recommended for large datasets as it prevents memory exhaustion (Zero Allocation).
+        /// This method is highly recommended for large datasets as it writes directly to the output stream without buffering intermediate byte arrays in application memory.
         /// </summary>
         /// <typeparam name="TModel">The type of the model being exported.</typeparam>
         /// <param name="data">The collection of models to write to the Excel file.</param>
@@ -35,6 +29,11 @@ namespace Exceler.Abstractions
             IEnumerable<TModel> data,
             Stream outputStream,
             string? sheetName = null)
-            where TModel : class, new();
+            where TModel : class;
+
+        Task WriteAsync<TModel>(
+            IAsyncEnumerable<TModel> dataStream,
+            Stream outputStream,
+            string? sheetName = null) where TModel : class;
     }
 }

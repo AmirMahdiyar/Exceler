@@ -1,9 +1,9 @@
-﻿namespace Exceler.Pipeline.Write
+namespace Exceler.Pipeline.Write
 {
     /// <summary>
     /// Abstract base class for the Chain of Responsibility pattern used in generating and styling Excel files.
     /// </summary>
-    internal abstract class WriteHandler<TModel> where TModel : class, new()
+    internal abstract class WriteHandler<TModel> where TModel : class
     {
         protected WriteHandler<TModel>? Next;
 
@@ -22,6 +22,6 @@
         /// Executes the current document generation step and passes the context to the next handler.
         /// </summary>
         /// <param name="context">The context containing the worksheet and export data.</param>
-        public abstract void Handle(WriteContext<TModel> context);
+        public abstract Task HandleAsync(WriteContext<TModel> context);
     }
 }

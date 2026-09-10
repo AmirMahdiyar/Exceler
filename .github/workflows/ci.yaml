@@ -2,7 +2,7 @@ name: Exceler CI
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "feature-branch" ]
   pull_request:
     branches: [ "main", "master" ]
 

@@ -1,4 +1,4 @@
-﻿using Exceler.Abstractions;
+using Exceler.Abstractions;
 using Exceler.Core.Converter;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -7,22 +7,34 @@ namespace Exceler.Configuration
 {
     internal static class MappingExpressionBuilder
     {
-        public static (Action<TInput, object> Setter, Func<TInput, object> Getter) BuildDelegates<TInput, TProperty>(
+        public static (Action<TInput, object>? Setter, Func<TInput, object> Getter) BuildDelegates<TInput, TProperty>(
             Expression<Func<TInput, TProperty>> propertySelector,
             IExcelValueConverter<TProperty>? converter)
             where TInput : class
         {
             var propertyInfo = GetPropertyInfo(propertySelector);
             var instanceParam = Expression.Parameter(typeof(TInput), "instance");
-            var valueParam = Expression.Parameter(typeof(object), "value");
             var propertyAccess = Expression.Property(instanceParam, propertyInfo);
 
-            var valueToAssign = BuildAssignExpression(propertyInfo, valueParam, converter);
+            Action<TInput, object>? setter = null;
+            if (propertyInfo.CanWrite)
+            {
+                try
+                {
+                    var valueParam = Expression.Parameter(typeof(object), "value");
+                    var valueToAssign = BuildAssignExpression(propertyInfo, valueParam, converter);
+                    var assign = Expression.Assign(propertyAccess, valueToAssign);
+                    setter = Expression.Lambda<Action<TInput, object>>(assign, instanceParam, valueParam).Compile();
+                }
+                catch
+                {
+                    // Init-only or custom accessor properties may not support Expression.Assign.
+                    // Setter is only required when reading from Excel, not when writing.
+                    setter = null;
+                }
+            }
+
             var valueToExport = BuildExportExpression(propertyAccess, converter);
-
-            var assign = Expression.Assign(propertyAccess, valueToAssign);
-
-            var setter = Expression.Lambda<Action<TInput, object>>(assign, instanceParam, valueParam).Compile();
             var getter = Expression.Lambda<Func<TInput, object>>(valueToExport, instanceParam).Compile();
 
             return (setter, getter);

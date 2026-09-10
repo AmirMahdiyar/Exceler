@@ -1,14 +1,9 @@
-﻿using Exceler.Abstractions;
+using Exceler.Abstractions;
 using Exceler.Configuration;
 using Exceler.Pipeline.Write;
 using Exceler.Pipeline.Write.Handlers;
 using Microsoft.Extensions.DependencyInjection;
 using OfficeOpenXml;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Exceler.Core
 {
@@ -19,36 +14,44 @@ namespace Exceler.Core
         public DefaultWriter(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         }
 
-        public async Task<byte[]> Write<TModel>(IEnumerable<TModel> data, string? sheetName = null) where TModel : class, new()
+        public async Task<byte[]> Write<TModel>(IEnumerable<TModel> data, string? sheetName = null) where TModel : class
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
-            var profile = _serviceProvider.GetRequiredService<ExcelProfile<TModel>>();
-            profile.EnsureBuilt();
+            var profile = GetProfile<TModel>();
 
             using var package = new ExcelPackage();
-            PopulatePackage(package, data, profile, sheetName);
+            await PopulatePackageAsync(package, profile, sheetName, data: data);
 
             return await package.GetAsByteArrayAsync();
         }
-        public async Task WriteAsync<TModel>(IEnumerable<TModel> data, Stream outputStream, string? sheetName = null) where TModel : class, new()
+        public async Task WriteAsync<TModel>(IEnumerable<TModel> data, Stream outputStream, string? sheetName = null) where TModel : class
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-            var profile = _serviceProvider.GetRequiredService<ExcelProfile<TModel>>();
-            profile.EnsureBuilt();
+            var profile = GetProfile<TModel>();
 
             using var package = new ExcelPackage();
-            PopulatePackage(package, data, profile, sheetName);
+            await PopulatePackageAsync(package, profile, sheetName, data: data);
+
+            await package.SaveAsAsync(outputStream);
+        }
+        public async Task WriteAsync<TModel>(IAsyncEnumerable<TModel> dataStream, Stream outputStream, string? sheetName = null) where TModel : class
+        {
+            var profile = GetProfile<TModel>();
+            using var package = new ExcelPackage();
+
+            await PopulatePackageAsync(package, profile, sheetName, asyncData: dataStream);
 
             await package.SaveAsAsync(outputStream);
         }
 
         #region Private Methods
-        private void PopulatePackage<TModel>(ExcelPackage package, IEnumerable<TModel> data, ExcelProfile<TModel> profile, string? sheetName) where TModel : class, new()
+        private async Task PopulatePackageAsync<TModel>(
+                    ExcelPackage package,
+                    ExcelProfile<TModel> profile,
+                    string? sheetName,
+                    IEnumerable<TModel>? data = null,
+                    IAsyncEnumerable<TModel>? asyncData = null) where TModel : class
         {
             var finalSheetName = string.IsNullOrWhiteSpace(sheetName) ? "Sheet1" : sheetName;
             var worksheet = package.Workbook.Worksheets.Add(finalSheetName);
@@ -57,14 +60,15 @@ namespace Exceler.Core
             {
                 Worksheet = worksheet,
                 Profile = profile,
-                Data = data
+                Data = data,
+                AsyncData = asyncData
             };
 
             var chain = BuildWriteChain<TModel>();
-            chain.Handle(context);
+            await chain.HandleAsync(context);
         }
 
-        private WriteHandler<TModel> BuildWriteChain<TModel>() where TModel : class, new()
+        private WriteHandler<TModel> BuildWriteChain<TModel>() where TModel : class
         {
             var head = new HeaderWriterHandler<TModel>();
 
@@ -73,6 +77,12 @@ namespace Exceler.Core
                 .SetNext(new FormattingWriterHandler<TModel>());
 
             return head;
+        }
+        private ExcelProfile<TModel> GetProfile<TModel>() where TModel : class
+        {
+            var profile = _serviceProvider.GetRequiredService<ExcelProfile<TModel>>();
+            profile.EnsureBuilt();
+            return profile;
         }
         #endregion
     }

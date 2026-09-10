@@ -1,4 +1,4 @@
-﻿using Exceler.Abstractions;
+using Exceler.Abstractions;
 using Exceler.Core;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;

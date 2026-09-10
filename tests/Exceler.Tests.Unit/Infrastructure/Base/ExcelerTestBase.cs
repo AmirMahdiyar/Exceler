@@ -1,4 +1,4 @@
-﻿using Exceler.Abstractions;
+using Exceler.Abstractions;
 using Exceler.DependencyInjection;
 using Exceler.Tests.Infrastructure.ModelOfTest;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,8 +14,6 @@ namespace Exceler.Tests.Infrastructure.Base
 
         protected ExcelerTestBase()
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
             var services = new ServiceCollection();
 
             services.AddExcelCore(builder =>

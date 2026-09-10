@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
 	  <TargetFrameworks>net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
@@ -23,6 +23,10 @@
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="7.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Exceler.Tests" />
   </ItemGroup>
 
 </Project>

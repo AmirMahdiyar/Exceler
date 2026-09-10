@@ -1,4 +1,4 @@
-﻿using Exceler.Abstractions;
+using Exceler.Abstractions;
 using Exceler.Configuration;
 using OfficeOpenXml;
 using System;
@@ -42,11 +42,23 @@ namespace Exceler.Pipeline.Read
         /// <summary>Gets the optional validator to validate the parsed input model.</summary>
         public IExcelValidator<TInput>? Validator { get; init; }
 
+        /// <summary>Gets the optional asynchronous validator to validate the parsed input model.</summary>
+        public IAsyncExcelValidator<TInput>? AsyncValidator { get; init; }
+
         /// <summary>Gets the processor responsible for transforming the input model into the output model.</summary>
-        public IExcelProcessor<TInput, TOutput> Processor { get; init; } = null!;
+        public IExcelProcessor<TInput, TOutput>? Processor { get; init; }
+
+        /// <summary>Gets the optional asynchronous processor responsible for transforming the input model into the output model.</summary>
+        public IAsyncExcelProcessor<TInput, TOutput>? AsyncProcessor { get; init; }
 
         /// <summary>Gets the instance of the input model currently being populated.</summary>
         public TInput InputModel { get; } = new TInput();
+
+        /// <summary>Gets the pre-filtered active column setters for the worksheet.</summary>
+        public KeyValuePair<int, Action<TInput, object>>[]? ActiveSetters { get; init; }
+
+        /// <summary>Gets the pre-read cell values for the current row corresponding to ActiveSetters.</summary>
+        public object?[]? RowValues { get; init; }
 
         /// <summary>Gets the final result object containing parsed data or validation errors.</summary>
         public ExcelRowResult<TOutput> Result { get; }

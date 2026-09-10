@@ -1,4 +1,4 @@
-﻿using Exceler.Tests.Infrastructure;
+using Exceler.Tests.Infrastructure;
 using Exceler.Tests.Infrastructure.Base;
 using Exceler.Tests.Infrastructure.ModelOfTest;
 using FluentAssertions;
@@ -30,7 +30,7 @@ namespace Exceler.Tests.Unit.Readers
             using var stream = builder
                 .WithTestModelHeaders()
                 .WithCell(1, 5, "Extra Unmapped Header")
-                .WithRow(2, 1, "John Doe", null, null, "Should be ignored")
+                .WithRow(2, 1, "John Doe", 150.0, "2026-01-01", "Should be ignored")
                 .Build();
 
             // Act
@@ -49,8 +49,8 @@ namespace Exceler.Tests.Unit.Readers
             using var builder = new ExcelStreamBuilder("EmptyRows");
             using var stream = builder
                 .WithTestModelHeaders()
-                .WithCell(2, 1, 1)
-                .WithCell(4, 1, 2)
+                .WithRow(2, 1, "User 1", 100.0, "2026-01-01")
+                .WithRow(4, 2, "User 2", 200.0, "2026-01-02")
                 .Build();
 
             // Act

@@ -1,4 +1,4 @@
-﻿using Exceler.Abstractions;
+using Exceler.Abstractions;
 using Exceler.Core.Converter;
 using System;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ namespace Exceler.Configuration
     /// Inherit from this class to configure column indices, headers, and custom converters using the Fluent API.
     /// </summary>
     /// <typeparam name="TInput">The type of the model representing a single Excel row.</typeparam>
-    public abstract class ExcelProfile<TInput> where TInput : class, new()
+    public abstract class ExcelProfile<TInput> where TInput : class
     {
         internal Dictionary<int, Action<TInput, object>> CompiledSetters { get; } = new();
         internal Dictionary<int, Func<TInput, object>> CompiledGetters { get; } = new();
@@ -25,6 +25,60 @@ namespace Exceler.Configuration
         private bool _isBuilt = false;
         public bool TrimStringValues { get; protected set; } = true;
         public bool ValidateTemplateOnRead { get; protected set; } = true;
+
+        /// <summary>
+        /// Gets or sets whether the worksheet view orientation should be Right-To-Left (RTL).
+        /// Default is false (Left-To-Right).
+        /// </summary>
+        public bool RightToLeft { get; protected set; } = false;
+
+        /// <summary>
+        /// Gets or sets whether column widths should be automatically calculated based on content.
+        /// Default is true. Disabling this is recommended for high-volume exports to avoid performance bottlenecks.
+        /// </summary>
+        public bool AutoFitColumns { get; protected set; } = true;
+
+        /// <summary>
+        /// Configures the worksheet view orientation to Right-To-Left (RTL).
+        /// </summary>
+        /// <param name="enabled">True to enable Right-To-Left; otherwise false.</param>
+        /// <returns>The current profile instance for fluent chaining.</returns>
+        protected ExcelProfile<TInput> WithRightToLeft(bool enabled = true)
+        {
+            RightToLeft = enabled;
+            return this;
+        }
+
+        /// <summary>
+        /// Configures whether columns should be automatically fitted to their content.
+        /// </summary>
+        /// <param name="enabled">True to enable AutoFitColumns; otherwise false.</param>
+        /// <returns>The current profile instance for fluent chaining.</returns>
+        protected ExcelProfile<TInput> WithAutoFitColumns(bool enabled = true)
+        {
+            AutoFitColumns = enabled;
+            return this;
+        }
+
+        /// <summary>
+        /// Configures whether string values read from cells should be trimmed.
+        /// </summary>
+        /// <returns>The current profile instance for fluent chaining.</returns>
+        protected ExcelProfile<TInput> WithTrimStringValues(bool enabled = true)
+        {
+            TrimStringValues = enabled;
+            return this;
+        }
+
+        /// <summary>
+        /// Configures whether header template validation should be executed during reading.
+        /// </summary>
+        /// <returns>The current profile instance for fluent chaining.</returns>
+        protected ExcelProfile<TInput> WithValidateTemplateOnRead(bool enabled = true)
+        {
+            ValidateTemplateOnRead = enabled;
+            return this;
+        }
 
         /// <summary>
         /// Initiates the mapping configuration for a specific property of the input model.
@@ -76,7 +130,9 @@ namespace Exceler.Configuration
 
             var (setter, getter) = MappingExpressionBuilder.BuildDelegates(propertySelector, converter);
 
-            CompiledSetters[columnIndex] = setter;
+            if (setter != null)
+                CompiledSetters[columnIndex] = setter;
+
             CompiledGetters[columnIndex] = getter;
         }
     }

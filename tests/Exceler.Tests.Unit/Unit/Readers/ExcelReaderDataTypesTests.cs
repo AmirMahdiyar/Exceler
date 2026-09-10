@@ -1,4 +1,4 @@
-﻿using Exceler.Tests.Infrastructure;
+using Exceler.Tests.Infrastructure;
 using Exceler.Tests.Infrastructure.Base;
 using Exceler.Tests.Infrastructure.EdgeCases;
 using Exceler.Tests.Infrastructure.ModelOfTest;
@@ -46,8 +46,8 @@ namespace Exceler.Tests.Unit.Readers
             using var builder = new ExcelStreamBuilder("Dates");
             using var stream = builder
                 .WithTestModelHeaders()
-                .WithCell(2, 1, 1).WithCell(2, 4, 45000.5)               // OADate Format
-                .WithCell(3, 1, 2).WithCell(3, 4, "2026-08-31 14:30")  // String Format
+                .WithCell(2, 1, 1).WithCell(2, 3, 100.0).WithCell(2, 4, 45000.5)               // OADate Format
+                .WithCell(3, 1, 2).WithCell(3, 3, 200.0).WithCell(3, 4, "2026-08-31 14:30")  // String Format
                 .Build();
 
             // Act
@@ -59,6 +59,25 @@ namespace Exceler.Tests.Unit.Readers
 
             results[0].Data!.CreatedAt.Should().Be(DateTime.FromOADate(45000.5));
             results[1].Data!.CreatedAt.Should().Be(new DateTime(2026, 8, 31, 14, 30, 0));
+        }
+
+        [Fact]
+        public void WhenReadingRowWithEmptyCellForNonNullableProperty_RowIsMarkedInvalidWithError()
+        {
+            // Arrange
+            using var builder = new ExcelStreamBuilder("MissingData");
+            using var stream = builder
+                .WithTestModelHeaders()
+                .WithRow(2, null, "Alice", 100.5, "2026-01-01")
+                .Build();
+
+            // Act
+            var results = Reader.Read<TestModel, TestModel>(stream).ToList();
+
+            // Assert
+            results.Should().HaveCount(1);
+            results[0].IsValid.Should().BeFalse();
+            results[0].Errors.Should().ContainMatch("*User ID*");
         }
     }
 }

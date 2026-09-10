@@ -1,7 +1,9 @@
-﻿using Exceler.Tests.Infrastructure.Base;
+using Exceler.DependencyInjection;
+using Exceler.Tests.Infrastructure.Base;
 using Exceler.Tests.Infrastructure.EdgeCases;
 using Exceler.Tests.Infrastructure.ModelOfTest;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using OfficeOpenXml;
 
 namespace Exceler.Tests.Unit.Writers
@@ -55,5 +57,36 @@ namespace Exceler.Tests.Unit.Writers
 
             worksheet.Cells[2, 2].Value.Should().Be(true);
         }
+
+        [Fact]
+        public async Task WhenExportingEmptyDataWithNoHeaders_ExcelIsGeneratedWithoutNullReferenceException()
+        {
+            // Arrange
+            var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+            services.AddExcelCore(builder =>
+            {
+                builder.RegisterFromAssemblyContaining<EmptyModelProfile>();
+                builder.UseNonCommercialLicense();
+            });
+            var provider = services.BuildServiceProvider();
+            var writer = provider.GetRequiredService<Exceler.Abstractions.IExcelWriter>();
+
+            var emptyData = new List<EmptyModel>();
+
+            // Act
+            Func<Task<byte[]>> act = async () => await writer.Write(emptyData);
+
+            // Assert
+            var bytes = await act.Should().NotThrowAsync();
+            bytes.Subject.Should().NotBeNullOrEmpty();
+        }
+    }
+
+    public class EmptyModel
+    {
+    }
+
+    public class EmptyModelProfile : Exceler.Configuration.ExcelProfile<EmptyModel>
+    {
     }
 }

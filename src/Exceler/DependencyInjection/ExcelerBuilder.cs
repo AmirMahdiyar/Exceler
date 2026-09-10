@@ -1,4 +1,4 @@
-﻿using Exceler.Abstractions;
+using Exceler.Abstractions;
 using Exceler.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OfficeOpenXml;
@@ -16,6 +16,9 @@ namespace Exceler.DependencyInjection
 
         /// <inheritdoc />
         public bool IsLicenseConfigured { get; private set; } = false;
+
+        /// <inheritdoc />
+        public OfficeOpenXml.LicenseContext? LicenseContext { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExcelerBuilder"/> class.
@@ -55,7 +58,8 @@ namespace Exceler.DependencyInjection
         /// <inheritdoc />
         public IExcelerBuilder UseNonCommercialLicense()
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+            LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             IsLicenseConfigured = true;
             return this;
         }
@@ -63,7 +67,8 @@ namespace Exceler.DependencyInjection
         /// <inheritdoc />
         public IExcelerBuilder UseCommercialLicense()
         {
-            ExcelPackage.LicenseContext = LicenseContext.Commercial;
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.Commercial;
+            LicenseContext = OfficeOpenXml.LicenseContext.Commercial;
             IsLicenseConfigured = true;
             return this;
         }
@@ -84,13 +89,15 @@ namespace Exceler.DependencyInjection
         }
 
         /// <summary>
-        /// Registers a class implementing <see cref="IExcelProcessor{TInput, TOutput}"/> into the service collection.
+        /// Registers a class implementing <see cref="IExcelProcessor{TInput, TOutput}"/> or <see cref="IAsyncExcelProcessor{TInput, TOutput}"/> into the service collection.
         /// </summary>
         /// <param name="type">The type to check and register.</param>
         private void RegisterProcessor(Type type)
         {
             var processorInterfaces = type.GetInterfaces()
-                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IExcelProcessor<,>));
+                .Where(i => i.IsGenericType && 
+                    (i.GetGenericTypeDefinition() == typeof(IExcelProcessor<,>) ||
+                     i.GetGenericTypeDefinition() == typeof(IAsyncExcelProcessor<,>)));
 
             foreach (var pInterface in processorInterfaces)
             {
@@ -99,13 +106,15 @@ namespace Exceler.DependencyInjection
         }
 
         /// <summary>
-        /// Registers a class implementing <see cref="IExcelValidator{TInput}"/> into the service collection.
+        /// Registers a class implementing <see cref="IExcelValidator{TInput}"/> or <see cref="IAsyncExcelValidator{TInput}"/> into the service collection.
         /// </summary>
         /// <param name="type">The type to check and register.</param>
         private void RegisterValidator(Type type)
         {
             var validatorInterfaces = type.GetInterfaces()
-                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IExcelValidator<>));
+                .Where(i => i.IsGenericType && 
+                    (i.GetGenericTypeDefinition() == typeof(IExcelValidator<>) || 
+                     i.GetGenericTypeDefinition() == typeof(IAsyncExcelValidator<>)));
 
             foreach (var vInterface in validatorInterfaces)
             {

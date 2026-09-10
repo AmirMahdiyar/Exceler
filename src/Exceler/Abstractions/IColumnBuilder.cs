@@ -1,4 +1,4 @@
-﻿using Exceler.Configuration;
+using Exceler.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Exceler.Abstractions
 {
-    internal interface IColumnBuilder<TInput> where TInput : class, new()
+    internal interface IColumnBuilder<TInput> where TInput : class
     {
         void Compile(ExcelProfile<TInput> profile);
     }
