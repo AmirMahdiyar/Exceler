@@ -5,6 +5,7 @@ namespace Exceler.Pipeline.Write.Handlers
     /// </summary>
     internal class StyleWriterHandler<TModel> : WriteHandler<TModel> where TModel : class
     {
+        /// <inheritdoc />
         public override async Task HandleAsync(WriteContext<TModel> context)
         {
             foreach (var kvp in context.Profile.ColumnStyles)

@@ -1,33 +1,10 @@
-﻿using Exceler.Abstractions;
+using Exceler.Tests.Common.TestDoubles.Converters;
 using FluentAssertions;
+using System.Collections.Generic;
+using Xunit;
 
 namespace Exceler.Tests.Unit.Converter
 {
-    public class DelimitedListConverter : IExcelValueConverter<List<string>>
-    {
-        private readonly string _delimiter;
-        public DelimitedListConverter(string delimiter = ",") => _delimiter = delimiter;
-
-        public List<string>? ConvertFromExcel(object? value)
-        {
-            if (value == null || string.IsNullOrWhiteSpace(value.ToString()))
-                return new List<string>();
-
-            return value.ToString()!
-                .Split(_delimiter, System.StringSplitOptions.RemoveEmptyEntries)
-                .Select(x => x.Trim())
-                .Where(x => !string.IsNullOrEmpty(x))
-                .ToList();
-        }
-
-        public object? ConvertToExcel(List<string>? value)
-        {
-            if (value == null || !value.Any()) return null;
-            return string.Join(_delimiter, value);
-        }
-    }
-
-    // 2. Output-Based Unit Tests
     public class DelimitedListConverterTests
     {
         private readonly DelimitedListConverter _sut = new();

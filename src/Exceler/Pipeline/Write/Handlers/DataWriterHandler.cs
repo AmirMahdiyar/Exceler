@@ -5,6 +5,7 @@ namespace Exceler.Pipeline.Write.Handlers
     /// </summary>
     internal class DataWriterHandler<TModel> : WriteHandler<TModel> where TModel : class
     {
+        /// <inheritdoc />
         public override async Task HandleAsync(WriteContext<TModel> context)
         {
 
@@ -35,7 +36,13 @@ namespace Exceler.Pipeline.Write.Handlers
                 await Next.HandleAsync(context);
         }
 
-
+        /// <summary>
+        /// Writes a single model instance into the specified row cells based on compiled getters and handles type-specific formatting.
+        /// </summary>
+        /// <param name="worksheet">The target worksheet.</param>
+        /// <param name="row">The 1-based row index.</param>
+        /// <param name="item">The data model instance to write.</param>
+        /// <param name="getters">The array of compiled getters mapped to column indices.</param>
         private void WriteRow(
             OfficeOpenXml.ExcelWorksheet worksheet,
             int row,
@@ -52,7 +59,8 @@ namespace Exceler.Pipeline.Write.Handlers
                 if (finalValue is DateOnly dateOnly)
                 {
                     worksheet.Cells[row, columnIndex].Value = dateOnly.ToDateTime(TimeOnly.MinValue);
-                    if (string.IsNullOrEmpty(worksheet.Cells[row, columnIndex].Style.Numberformat.Format))
+                    var currentFormat = worksheet.Cells[row, columnIndex].Style.Numberformat.Format;
+                    if (string.IsNullOrEmpty(currentFormat) || currentFormat == "General")
                     {
                         worksheet.Cells[row, columnIndex].Style.Numberformat.Format = "yyyy-mm-dd";
                     }
@@ -60,7 +68,8 @@ namespace Exceler.Pipeline.Write.Handlers
                 else if (finalValue is TimeOnly timeOnly)
                 {
                     worksheet.Cells[row, columnIndex].Value = timeOnly.ToTimeSpan();
-                    if (string.IsNullOrEmpty(worksheet.Cells[row, columnIndex].Style.Numberformat.Format))
+                    var currentFormat = worksheet.Cells[row, columnIndex].Style.Numberformat.Format;
+                    if (string.IsNullOrEmpty(currentFormat) || currentFormat == "General")
                     {
                         worksheet.Cells[row, columnIndex].Style.Numberformat.Format = "hh:mm:ss";
                     }

@@ -5,6 +5,7 @@ namespace Exceler.Pipeline.Write.Handlers
     /// </summary>
     internal class HeaderWriterHandler<TModel> : WriteHandler<TModel> where TModel : class
     {
+        /// <inheritdoc />
         public override async Task HandleAsync(WriteContext<TModel> context)
         {
             foreach (var header in context.Profile.ColumnHeaders)

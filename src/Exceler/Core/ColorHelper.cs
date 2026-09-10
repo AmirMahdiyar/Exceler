@@ -11,6 +11,14 @@ namespace Exceler.Core
     /// </summary>
     internal static class ColorHelper
     {
+        /// <summary>
+        /// Parses a color string (Hex code, ExcelColor enum name, or standard CSS name) into a <see cref="Color"/> instance.
+        /// Performs zero allocations on the hot path using <see cref="ReadOnlySpan{T}"/>.
+        /// </summary>
+        /// <param name="hex">The color string to parse (e.g., "#FF0000", "#FFF", "Navy", "SoftBlue").</param>
+        /// <returns>The parsed <see cref="Color"/> struct.</returns>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="hex"/> is null or whitespace.</exception>
+        /// <exception cref="FormatException">Thrown when <paramref name="hex"/> cannot be parsed into a valid color.</exception>
         public static Color FromHex(string? hex)
         {
             if (string.IsNullOrWhiteSpace(hex))
@@ -70,6 +78,11 @@ namespace Exceler.Core
             throw new FormatException($"Invalid color string: '{hex}'. Expected a known color name, or '#RGB', '#RRGGBB', '#AARRGGBB'.");
         }
 
+        /// <summary>
+        /// Converts an <see cref="ExcelColor"/> enum value into its standard 6-character hex representation ("#RRGGBB").
+        /// </summary>
+        /// <param name="color">The ExcelColor enum value.</param>
+        /// <returns>A hex string starting with '#' (e.g., "#000080").</returns>
         public static string ToHex(ExcelColor color) => color switch
         {
             ExcelColor.Black => "#000000",
@@ -102,6 +115,11 @@ namespace Exceler.Core
             _ => "#000000"
         };
 
+        /// <summary>
+        /// Converts a <see cref="Color"/> struct into a hex string representation ("#RRGGBB" or "#AARRGGBB").
+        /// </summary>
+        /// <param name="color">The Color struct to convert.</param>
+        /// <returns>A hex string starting with '#'.</returns>
         public static string ToHex(Color color)
         {
             return color.A == 255

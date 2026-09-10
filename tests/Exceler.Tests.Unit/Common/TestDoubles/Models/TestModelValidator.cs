@@ -1,6 +1,6 @@
-﻿using Exceler.Abstractions;
+using Exceler.Abstractions;
 
-namespace Exceler.Tests.Infrastructure.ModelOfTest
+namespace Exceler.Tests.Common.TestDoubles.Models
 {
     public class TestModelValidator : IExcelValidator<TestModel>
     {

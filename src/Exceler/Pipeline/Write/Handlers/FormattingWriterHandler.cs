@@ -5,6 +5,7 @@ namespace Exceler.Pipeline.Write.Handlers
     /// </summary>
     internal class FormattingWriterHandler<TModel> : WriteHandler<TModel> where TModel : class
     {
+        /// <inheritdoc />
         public override async Task HandleAsync(WriteContext<TModel> context)
         {
             context.Worksheet.View.RightToLeft = context.Profile.RightToLeft;

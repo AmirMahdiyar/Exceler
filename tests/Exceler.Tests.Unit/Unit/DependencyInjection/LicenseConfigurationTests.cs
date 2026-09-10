@@ -1,22 +1,21 @@
 using Exceler.Abstractions;
 using Exceler.DependencyInjection;
-using Exceler.Tests.Infrastructure.ModelOfTest;
+using Exceler.Tests.Common.TestDoubles.Models;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using OfficeOpenXml;
+using System;
 
-namespace Exceler.Tests.Unit.Infrastructure
+namespace Exceler.Tests.Unit.DependencyInjection
 {
     public class LicenseConfigurationTests
     {
         [Fact]
-        public void WhenConfiguringCommercialLicense_CommercialLicenseContextIsSetAndMarkedConfigured()
+        public void Commercial_license_is_recorded_in_builder_context()
         {
-            // Arrange
             var services = new ServiceCollection();
             IExcelerBuilder? capturedBuilder = null;
 
-            // Act
             services.AddExcelCore(builder =>
             {
                 capturedBuilder = builder;
@@ -24,20 +23,17 @@ namespace Exceler.Tests.Unit.Infrastructure
                 builder.UseCommercialLicense();
             });
 
-            // Assert
             capturedBuilder.Should().NotBeNull();
             capturedBuilder!.IsLicenseConfigured.Should().BeTrue();
             capturedBuilder.LicenseContext.Should().Be(LicenseContext.Commercial);
         }
 
         [Fact]
-        public void WhenConfiguringNonCommercialLicense_NonCommercialLicenseContextIsSetAndMarkedConfigured()
+        public void Non_commercial_license_is_recorded_in_builder_context()
         {
-            // Arrange
             var services = new ServiceCollection();
             IExcelerBuilder? capturedBuilder = null;
 
-            // Act
             services.AddExcelCore(builder =>
             {
                 capturedBuilder = builder;
@@ -45,25 +41,21 @@ namespace Exceler.Tests.Unit.Infrastructure
                 builder.UseNonCommercialLicense();
             });
 
-            // Assert
             capturedBuilder.Should().NotBeNull();
             capturedBuilder!.IsLicenseConfigured.Should().BeTrue();
             capturedBuilder.LicenseContext.Should().Be(LicenseContext.NonCommercial);
         }
 
         [Fact]
-        public void WhenConfiguringExcelCoreWithoutLicense_InvalidOperationExceptionIsThrown()
+        public void Configuring_excel_core_without_license_fails()
         {
-            // Arrange
             var services = new ServiceCollection();
 
-            // Act
             Action act = () => services.AddExcelCore(builder =>
             {
                 builder.RegisterFromAssemblyContaining<TestModelProfile>();
             });
 
-            // Assert
             act.Should().Throw<InvalidOperationException>()
                 .WithMessage("*MUST explicitly accept the license terms*");
         }

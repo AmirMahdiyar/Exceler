@@ -1,4 +1,4 @@
-﻿namespace Exceler.Tests.Infrastructure.ModelOfTest
+namespace Exceler.Tests.Common.TestDoubles.Models
 {
     public class TestModelBuilder
     {

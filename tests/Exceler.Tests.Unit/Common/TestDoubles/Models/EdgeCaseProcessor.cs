@@ -1,6 +1,6 @@
-﻿using Exceler.Abstractions;
+using Exceler.Abstractions;
 
-namespace Exceler.Tests.Infrastructure.EdgeCases
+namespace Exceler.Tests.Common.TestDoubles.Models
 {
     public class EdgeCaseProcessor : IExcelProcessor<EdgeCaseModel, EdgeCaseModel>
     {

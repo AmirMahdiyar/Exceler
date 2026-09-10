@@ -11,11 +11,11 @@ namespace Exceler.DependencyInjection
     public static class ExcelerServiceCollectionExtensions
     {
         /// <summary>
-        /// Scans the provided assemblies and automatically registers all Excel profiles, processors, and validators.
-        /// Also registers the core <see cref="IExcelReader"/> and <see cref="IExcelWriter"/> services.
+        /// Registers the core Exceler framework components (<see cref="IExcelReader"/> and <see cref="IExcelWriter"/>)
+        /// and configures profiles, processors, validators, and licensing via the builder callback.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to add services to.</param>
-        /// <param name="assemblies">The assemblies to scan. If none are provided, the calling assembly is scanned.</param>
+        /// <param name="configure">An optional delegate to configure Exceler options, license context, and scan assemblies.</param>
         /// <returns>The same service collection so that multiple calls can be chained.</returns>
         public static IServiceCollection AddExcelCore(this IServiceCollection services, Action<IExcelerBuilder>? configure = null)
         {

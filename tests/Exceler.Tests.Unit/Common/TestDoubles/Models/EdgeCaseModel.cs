@@ -1,4 +1,4 @@
-﻿namespace Exceler.Tests.Infrastructure.EdgeCases
+namespace Exceler.Tests.Common.TestDoubles.Models
 {
     public class EdgeCaseModel
     {

@@ -10,6 +10,7 @@ namespace Exceler.Pipeline.Read.Handlers
     /// </summary>
     internal class ParseHandler<TInput, TOutput> : ReadHandler<TInput, TOutput> where TInput : class, new()
     {
+        /// <inheritdoc />
         public override void Handle(ReadContext<TInput, TOutput> context)
         {
             var activeSetters = context.ActiveSetters ?? context.Profile.CompiledSetters.Where(s => s.Key <= context.ColCount).ToArray();
@@ -27,7 +28,7 @@ namespace Exceler.Pipeline.Read.Handlers
                     if (context.Profile.TrimStringValues && cellValue is string strValue)
                         cellValue = string.IsNullOrWhiteSpace(strValue) ? null : strValue.Trim();
 
-                    setter.Value(context.InputModel, cellValue);
+                    setter.Value(context.InputModel, cellValue!);
                 }
                 catch (ExcelCastException)
                 {
@@ -61,6 +62,7 @@ namespace Exceler.Pipeline.Read.Handlers
                 Next.Handle(context);
         }
 
+        /// <inheritdoc />
         public override async Task HandleAsync(ReadContext<TInput, TOutput> context, CancellationToken cancellationToken = default)
         {
             Handle(context);
@@ -69,6 +71,12 @@ namespace Exceler.Pipeline.Read.Handlers
                 await Next.HandleAsync(context, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves the display column name from the profile headers, or a default 1-based column label if unnamed.
+        /// </summary>
+        /// <param name="context">The read context.</param>
+        /// <param name="columnIndex">The 1-based column index.</param>
+        /// <returns>The resolved column title.</returns>
         private static string GetColumnName(ReadContext<TInput, TOutput> context, int columnIndex)
         {
             return context.Profile.ColumnHeaders.TryGetValue(columnIndex, out var headerName)

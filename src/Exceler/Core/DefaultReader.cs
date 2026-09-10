@@ -7,22 +7,31 @@ using Microsoft.Extensions.DependencyInjection;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Exceler.Core
 {
+    /// <summary>
+    /// Default implementation of <see cref="IExcelReader"/> using EPPlus and a pipeline of read handlers.
+    /// </summary>
     internal class DefaultReader : IExcelReader
     {
         private readonly IServiceProvider _serviceProvider;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultReader"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider used to resolve profiles, validators, and processors.</param>
         public DefaultReader(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
 
+        /// <inheritdoc />
         public IEnumerable<ExcelRowResult<TOutput>> Read<TInput, TOutput>(Stream excelStream,
             string? sheetName = null) where TInput : class, new()
         {
@@ -70,6 +79,7 @@ namespace Exceler.Core
             }
         }
 
+        /// <inheritdoc />
         public async IAsyncEnumerable<List<ExcelRowResult<TOutput>>> ReadInChunksAsync<TInput, TOutput>(
             Stream excelStream,
             int chunkSize = 10000,
@@ -138,6 +148,14 @@ namespace Exceler.Core
         }
 
         #region Private Methods
+
+        /// <summary>
+        /// Resolves the mapping profile, validators, and processors for the given input and output types.
+        /// </summary>
+        /// <typeparam name="TInput">The input model type.</typeparam>
+        /// <typeparam name="TOutput">The output model type.</typeparam>
+        /// <returns>A tuple containing resolved profile, processors, and validators.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when no processor is found and input cannot be cast to output.</exception>
         private (ExcelProfile<TInput>, IExcelProcessor<TInput, TOutput>?, IAsyncExcelProcessor<TInput, TOutput>?, IExcelValidator<TInput>?, IAsyncExcelValidator<TInput>?) ResolveDependencies<TInput, TOutput>()
             where TInput : class, new()
         {
@@ -165,6 +183,16 @@ namespace Exceler.Core
 
             return (profile, processor, asyncProcessor, validator, asyncValidator);
         }
+
+        /// <summary>
+        /// Extracts cell values for a given row across all active column setters.
+        /// </summary>
+        /// <typeparam name="TInput">The input model type.</typeparam>
+        /// <param name="worksheet">The source worksheet.</param>
+        /// <param name="row">The 1-based row index.</param>
+        /// <param name="activeSetters">The array of active column setters.</param>
+        /// <param name="rowValues">The extracted cell values for the row.</param>
+        /// <returns>True if the row contains at least one non-empty value; otherwise, false.</returns>
         private static bool TryExtractRowValues<TInput>(
             ExcelWorksheet worksheet,
             int row,
@@ -194,6 +222,14 @@ namespace Exceler.Core
 
             return hasAnyValue;
         }
+
+        /// <summary>
+        /// Retrieves the target worksheet from the package by name, or returns the first worksheet if name is omitted.
+        /// </summary>
+        /// <param name="package">The Excel package instance.</param>
+        /// <param name="sheetName">The optional sheet name.</param>
+        /// <returns>The resolved <see cref="ExcelWorksheet"/>.</returns>
+        /// <exception cref="ArgumentException">Thrown when a specific sheet name is provided but not found.</exception>
         private ExcelWorksheet GetWorksheet(ExcelPackage package, string? sheetName)
         {
             if (string.IsNullOrWhiteSpace(sheetName))
@@ -205,6 +241,14 @@ namespace Exceler.Core
 
             return worksheet;
         }
+
+        /// <summary>
+        /// Validates worksheet headers against the configured profile column headers.
+        /// </summary>
+        /// <typeparam name="TInput">The input model type.</typeparam>
+        /// <param name="worksheet">The worksheet to validate.</param>
+        /// <param name="profile">The mapping profile containing expected headers.</param>
+        /// <exception cref="ExcelTemplateMismatchException">Thrown when headers do not match the profile definition.</exception>
         private void ValidateHeaders<TInput>(ExcelWorksheet worksheet, ExcelProfile<TInput> profile) where TInput : class, new()
         {
             if (!profile.ValidateTemplateOnRead || profile.ColumnHeaders.Count == 0)
@@ -230,6 +274,13 @@ namespace Exceler.Core
                 throw new ExcelTemplateMismatchException(errors);
             }
         }
+
+        /// <summary>
+        /// Assembles the Chain of Responsibility handlers for reading and processing Excel rows.
+        /// </summary>
+        /// <typeparam name="TInput">The input model type.</typeparam>
+        /// <typeparam name="TOutput">The output model type.</typeparam>
+        /// <returns>The head of the read handler pipeline.</returns>
         private ReadHandler<TInput, TOutput> BuildProcessingChain<TInput, TOutput>() where TInput : class, new()
         {
             var head = new ParseHandler<TInput, TOutput>();
@@ -239,6 +290,7 @@ namespace Exceler.Core
 
             return head;
         }
+
         #endregion
     }
 }

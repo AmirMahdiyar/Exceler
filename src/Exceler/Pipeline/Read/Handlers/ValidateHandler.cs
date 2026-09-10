@@ -13,6 +13,7 @@ namespace Exceler.Pipeline.Read.Handlers
     /// </summary>
     internal class ValidateHandler<TInput, TOutput> : ReadHandler<TInput, TOutput> where TInput : class, new()
     {
+        /// <inheritdoc />
         public override void Handle(ReadContext<TInput, TOutput> context)
         {
             if (context.Validator != null)
@@ -36,6 +37,7 @@ namespace Exceler.Pipeline.Read.Handlers
                 Next.Handle(context);
         }
 
+        /// <inheritdoc />
         public override async Task HandleAsync(ReadContext<TInput, TOutput> context, CancellationToken cancellationToken = default)
         {
             if (context.AsyncValidator != null)

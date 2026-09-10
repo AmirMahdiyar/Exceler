@@ -48,7 +48,7 @@ namespace Exceler.Tests.Unit.Writers
     public class ExcelColorStylingTests
     {
         [Fact]
-        public void WhenConfiguringColumnWithHexColors_HexValuesAreStoredInProfileStyles()
+        public void Hex_colors_are_stored_in_profile_column_styles()
         {
             // Arrange & Act
             var profile = new StyledColorModelProfile();
@@ -60,7 +60,7 @@ namespace Exceler.Tests.Unit.Writers
         }
 
         [Fact]
-        public void WhenConfiguringColumnWithExcelColorEnum_CorrespondingHexValueIsStored()
+        public void Excel_color_enum_values_are_converted_to_hex_in_profile_styles()
         {
             // Arrange & Act
             var profile = new EnumColorModelProfile();
@@ -72,7 +72,7 @@ namespace Exceler.Tests.Unit.Writers
         }
 
         [Fact]
-        public void WhenConfiguringColumnWithStringColorName_ColorNameIsStoredAndResolvedToHex()
+        public void Color_name_strings_are_resolved_to_hex_in_profile_styles()
         {
             // Arrange & Act
             var profile = new StringColorNameModelProfile();
@@ -87,7 +87,7 @@ namespace Exceler.Tests.Unit.Writers
         }
 
         [Fact]
-        public void WhenConfiguringColumnWithDrawingColor_EquivalentHexValueIsStored()
+        public void Drawing_colors_are_stored_as_equivalent_hex_in_profile_styles()
         {
             // Arrange & Act
             var profile = new DrawingColorModelProfile();
@@ -98,7 +98,7 @@ namespace Exceler.Tests.Unit.Writers
         }
 
         [Fact]
-        public void WhenReadingDrawingColorFromColumnStyle_CorrectColorInstanceIsReturned()
+        public void Drawing_color_properties_return_correct_color_instances()
         {
             // Arrange
             var style = new ColumnStyle { BackgroundColorHex = "#FF0000" };

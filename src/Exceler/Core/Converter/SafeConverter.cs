@@ -3,8 +3,20 @@ using System.Globalization;
 
 namespace Exceler.Core.Converter
 {
+    /// <summary>
+    /// Provides zero-allocation, culture-invariant, and null-safe type conversion from Excel cell values to C# model properties.
+    /// Supports primitive types, modern .NET types (DateOnly, TimeOnly, DateTimeOffset, TimeSpan), Guids, and Enums.
+    /// </summary>
     internal static class SafeConverter
     {
+        /// <summary>
+        /// Safely converts an untyped Excel cell object to the target property type <typeparamref name="T"/>.
+        /// Enforces culture-invariant parsing and strict nullability checks.
+        /// </summary>
+        /// <typeparam name="T">The target property type.</typeparam>
+        /// <param name="value">The raw value extracted from the Excel cell.</param>
+        /// <returns>The strongly-typed converted value, or default if the target is nullable and the input is empty.</returns>
+        /// <exception cref="ExcelCastException">Thrown when the value cannot be safely cast or converted to <typeparamref name="T"/>, or when an empty value is provided for a non-nullable type.</exception>
         public static T? ChangeType<T>(object? value)
         {
             Type targetType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);

@@ -24,6 +24,9 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <Using Include="Exceler.Tests.Common.Fixtures" />
+    <Using Include="Exceler.Tests.Common.TestDoubles.Models" />
+    <Using Include="Exceler.Tests.Common.TestDoubles.Converters" />
   </ItemGroup>
 
 </Project>

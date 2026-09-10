@@ -18,7 +18,7 @@ namespace Exceler.Pipeline.Read
     internal class ReadContext<TInput, TOutput> where TInput : class, new()
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RowContext{TInput, TOutput}"/> class.
+        /// Initializes a new instance of the <see cref="ReadContext{TInput, TOutput}"/> class.
         /// </summary>
         /// <param name="row">The current row index being processed.</param>
         public ReadContext(int row)

@@ -1,6 +1,6 @@
-﻿using Exceler.Configuration;
+using Exceler.Configuration;
 
-namespace Exceler.Tests.Infrastructure.EdgeCases
+namespace Exceler.Tests.Common.TestDoubles.Models
 {
     public class EdgeCaseProfile : ExcelProfile<EdgeCaseModel>
     {

@@ -5,6 +5,9 @@ namespace Exceler.Pipeline.Write
     /// </summary>
     internal abstract class WriteHandler<TModel> where TModel : class
     {
+        /// <summary>
+        /// Gets or sets the reference to the next handler in the execution chain.
+        /// </summary>
         protected WriteHandler<TModel>? Next;
 
         /// <summary>

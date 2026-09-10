@@ -2,7 +2,7 @@ using Exceler.Core;
 using FluentAssertions;
 using System.Drawing;
 
-namespace Exceler.Tests.Unit.Infrastructure
+namespace Exceler.Tests.Unit.Core
 {
     public class ColorHelperTests
     {

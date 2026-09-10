@@ -1,7 +1,7 @@
 using Exceler.Configuration;
 using Exceler.Core.Converter;
 using Exceler.Core.Exceptions;
-using Exceler.Tests.Infrastructure.Base;
+using Exceler.Tests.Common.Fixtures;
 using FluentAssertions;
 using System;
 using System.Collections.Generic;

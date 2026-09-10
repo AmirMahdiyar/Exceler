@@ -10,6 +10,7 @@ namespace Exceler.Pipeline.Read.Handlers
     /// </summary>
     internal class ProcessHandler<TInput, TOutput> : ReadHandler<TInput, TOutput> where TInput : class, new()
     {
+        /// <inheritdoc />
         public override void Handle(ReadContext<TInput, TOutput> context)
         {
             try
@@ -30,6 +31,7 @@ namespace Exceler.Pipeline.Read.Handlers
             }
         }
 
+        /// <inheritdoc />
         public override async Task HandleAsync(ReadContext<TInput, TOutput> context, CancellationToken cancellationToken = default)
         {
             try

@@ -1,6 +1,6 @@
-﻿using OfficeOpenXml;
+using OfficeOpenXml;
 
-namespace Exceler.Tests.Infrastructure
+namespace Exceler.Tests.Common.Fixtures
 {
     public class ExcelStreamBuilder : IDisposable
     {
@@ -53,6 +53,17 @@ namespace Exceler.Tests.Infrastructure
             _package.SaveAs(stream);
             stream.Position = 0;
             return stream;
+        }
+
+        /// <summary>
+        /// Creates an in-memory Excel stream containing a single empty worksheet with the specified name.
+        /// </summary>
+        /// <param name="sheetName">The name of the empty worksheet.</param>
+        /// <returns>A readable <see cref="MemoryStream"/> of the workbook.</returns>
+        public static MemoryStream EmptySheet(string sheetName = "Sheet1")
+        {
+            using var builder = new ExcelStreamBuilder(sheetName);
+            return builder.Build();
         }
 
         public void Dispose()

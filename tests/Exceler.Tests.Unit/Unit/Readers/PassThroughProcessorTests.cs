@@ -1,8 +1,8 @@
 using Exceler.Abstractions;
 using Exceler.Configuration;
 using Exceler.Core;
-using Exceler.Tests.Infrastructure;
-using Exceler.Tests.Infrastructure.Base;
+using Exceler.Tests.Common.Fixtures;
+using Exceler.Tests.Common.Fixtures;
 using FluentAssertions;
 using System;
 using System.Collections.Generic;
@@ -63,7 +63,7 @@ namespace Exceler.Tests.Unit.Readers
     public class PassThroughProcessorTests : ExcelerTestBase
     {
         [Fact]
-        public void WhenNoProcessorIsRegistered_IdenticalInputAndOutputTypesUseDefaultPassThroughProcessor()
+        public void Matching_input_and_output_types_default_to_pass_through_processing()
         {
             // Arrange
             using var builder = new ExcelStreamBuilder("PassThroughDirect");
@@ -86,7 +86,7 @@ namespace Exceler.Tests.Unit.Readers
         }
 
         [Fact]
-        public async Task WhenNoProcessorIsRegisteredInChunkedRead_DefaultPassThroughProcessorWorksSeamlessly()
+        public async Task Chunked_reading_applies_pass_through_processing_when_types_match()
         {
             // Arrange
             using var builder = new ExcelStreamBuilder("PassThroughChunked");
@@ -110,7 +110,7 @@ namespace Exceler.Tests.Unit.Readers
         }
 
         [Fact]
-        public void WhenCustomProcessorIsRegistered_CustomProcessorTakesPrecedenceOverPassThrough()
+        public void Custom_processor_overrides_default_pass_through()
         {
             // Arrange
             using var builder = new ExcelStreamBuilder("CustomPrecedence");
@@ -128,7 +128,7 @@ namespace Exceler.Tests.Unit.Readers
         }
 
         [Fact]
-        public void WhenNoProcessorIsRegisteredAndTypesDiffer_ThrowsInvalidOperationExceptionWithHelpfulMessage()
+        public void Different_input_and_output_types_without_processor_fail_with_descriptive_message()
         {
             // Arrange
             using var builder = new ExcelStreamBuilder("DifferingTypesNoProcessor");

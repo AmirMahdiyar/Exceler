@@ -1,6 +1,6 @@
 using Exceler.Configuration;
 using Exceler.Extensions;
-using Exceler.Tests.Infrastructure.Base;
+using Exceler.Tests.Common.Fixtures;
 using FluentAssertions;
 using OfficeOpenXml;
 using System.Collections.Generic;

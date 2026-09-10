@@ -1,5 +1,5 @@
 using Exceler.Configuration;
-using Exceler.Tests.Infrastructure.Base;
+using Exceler.Tests.Common.Fixtures;
 using FluentAssertions;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;

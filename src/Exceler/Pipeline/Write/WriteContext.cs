@@ -18,6 +18,7 @@ namespace Exceler.Pipeline.Write
 
         /// <summary>Gets the collection of data records to be written to the worksheet.</summary>
         public IEnumerable<TModel>? Data { get; init; } = null!;
+        /// <summary>Gets the asynchronous stream of data records to be written to the worksheet.</summary>
         public IAsyncEnumerable<TModel>? AsyncData { get; init; }
 
 

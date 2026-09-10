@@ -1,3 +1,8 @@
+using Exceler.Configuration;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+
 namespace Exceler.Abstractions
 {
     /// <summary>
@@ -10,11 +15,12 @@ namespace Exceler.Abstractions
         /// </summary>
         /// <typeparam name="TModel">The type of the model being exported.</typeparam>
         /// <param name="data">The collection of models to write to the Excel file.</param>
+        /// <param name="sheetName">The optional name of the worksheet. If null, a default name is used.</param>
         /// <returns>A byte array representing the generated Excel file (.xlsx format).</returns>
         Task<byte[]> Write<TModel>(
-        IEnumerable<TModel> data,
-        string? sheetName = null)
-        where TModel : class;
+            IEnumerable<TModel> data,
+            string? sheetName = null)
+            where TModel : class;
 
         /// <summary>
         /// Generates an Excel file and writes it directly to the provided stream asynchronously.
@@ -31,9 +37,19 @@ namespace Exceler.Abstractions
             string? sheetName = null)
             where TModel : class;
 
+        /// <summary>
+        /// Generates an Excel file by streaming models asynchronously from an <see cref="IAsyncEnumerable{TModel}"/> directly into the output stream.
+        /// Ideal for streaming large query results directly from Entity Framework Core (via AsAsyncEnumerable()) without loading the entire collection into memory.
+        /// </summary>
+        /// <typeparam name="TModel">The type of the model being exported.</typeparam>
+        /// <param name="dataStream">The asynchronous stream of models to write.</param>
+        /// <param name="outputStream">The stream where the Excel file will be written (e.g., Response.Body or MemoryStream).</param>
+        /// <param name="sheetName">The optional name of the worksheet. If null, a default name is used.</param>
+        /// <returns>A task that represents the asynchronous write operation.</returns>
         Task WriteAsync<TModel>(
             IAsyncEnumerable<TModel> dataStream,
             Stream outputStream,
-            string? sheetName = null) where TModel : class;
+            string? sheetName = null)
+            where TModel : class;
     }
 }

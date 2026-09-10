@@ -11,6 +11,9 @@ namespace Exceler.Pipeline.Read
     /// </summary>
     internal abstract class ReadHandler<TInput, TOutput> where TInput : class, new()
     {
+        /// <summary>
+        /// Gets or sets the reference to the next handler in the processing chain.
+        /// </summary>
         protected ReadHandler<TInput, TOutput>? Next;
 
         /// <summary>
