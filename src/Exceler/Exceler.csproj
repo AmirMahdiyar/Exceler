@@ -7,7 +7,8 @@
 
 	  <IsPackable>true</IsPackable>
 	  <PackageId>Exceler</PackageId>
-	  <Version>1.0.0-beta.1</Version>
+	  <Version>1.0.0</Version>
+	  <PackageReleaseNotes>🚀 Official v1.0.0 Release! Added high-performance streaming, robust pipeline architecture, and zero-allocation handlers.</PackageReleaseNotes>
 	  <Authors>Amir Mahdiyar</Authors>
 	  <Description>A high-performance, memory-efficient, and pipeline-based Excel reader/writer for .NET applications.</Description>
 	  <PackageTags>excel;epplus;export;import;performance;chunking</PackageTags>
