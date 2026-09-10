@@ -21,8 +21,8 @@ namespace Exceler.Tests.Unit.Writers
         {
             WithRightToLeft();
 
-            Map(x => x.CustomerId).ToColumn(1).WithHeader("شناسه مشتری");
-            Map(x => x.CustomerName).ToColumn(2).WithHeader("نام مشتری");
+            Map(x => x.CustomerId).ToColumn(1).WithHeader("Customer ID");
+            Map(x => x.CustomerName).ToColumn(2).WithHeader("Customer Name");
         }
     }
 
@@ -76,12 +76,12 @@ namespace Exceler.Tests.Unit.Writers
     public class ExcelWriterViewAndLayoutTests : ExcelerTestBase
     {
         [Fact]
-        public async Task WhenProfileSpecifiesRightToLeft_WorksheetOrientationIsRightToLeft()
+        public async Task Worksheet_orientation_is_right_to_left_when_profile_specifies_rtl()
         {
             // Arrange
             var data = new List<RtlCustomerModel>
             {
-                new() { CustomerId = 1, CustomerName = "شرکت پتروشیمی خلیج فارس" }
+                new() { CustomerId = 1, CustomerName = "Global Logistics Ltd" }
             };
 
             // Act

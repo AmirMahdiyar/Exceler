@@ -240,53 +240,53 @@ namespace TestExcelerWebApi.Profile
 
             Map(x => x.TrackingCode)
                 .ToColumn(1)
-                .WithHeader("کد رهگیری (GUID)")
+                .WithHeader("Tracking Code (GUID)")
                 .IsBold(true)
                 .WithFontColor(ExcelColor.DarkBlue);
 
             Map(x => x.CustomerCode)
                 .ToColumn(2)
-                .WithHeader("کد مشتری")
+                .WithHeader("Customer Code")
                 .IsBold(true);
 
             Map(x => x.CustomerName)
                 .ToColumn(3)
-                .WithHeader("نام مشتری");
+                .WithHeader("Customer Name");
 
             Map(x => x.OrderDate)
                 .ToColumn(4)
-                .WithHeader("تاریخ ثبت سفارش")
+                .WithHeader("Order Date")
                 .WithNumberFormat("yyyy-mm-dd");
 
             Map(x => x.PreferredDeliveryTime)
                 .ToColumn(5)
-                .WithHeader("ساعت تحویل")
+                .WithHeader("Preferred Delivery Time")
                 .WithNumberFormat("hh:mm");
 
             Map(x => x.Quantity)
                 .ToColumn(6)
-                .WithHeader("تعداد اقلام")
+                .WithHeader("Item Quantity")
                 .WithNumberFormat("#,##0");
 
             Map(x => x.TotalAmount)
                 .ToColumn(7)
-                .WithHeader("مبلغ کل نهایی")
+                .WithHeader("Total Amount")
                 .IsBold(true)
                 .WithNumberFormat("$#,##0.00")
                 .WithBackgroundColor(ExcelColor.SoftGreen);
 
             Map(x => x.Status)
                 .ToColumn(8)
-                .WithHeader("وضعیت سفارش")
+                .WithHeader("Order Status")
                 .WithBackgroundColor(ExcelColor.SoftYellow);
 
             Map(x => x.Priority)
                 .ToColumn(9)
-                .WithHeader("اولویت ارسال");
+                .WithHeader("Shipping Priority");
 
             Map(x => x.IsExpressDelivery)
                 .ToColumn(10)
-                .WithHeader("ارسال اکسپرس");
+                .WithHeader("Express Delivery");
         }
     }
 }
