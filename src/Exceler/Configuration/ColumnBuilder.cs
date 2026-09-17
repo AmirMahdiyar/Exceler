@@ -177,9 +177,86 @@ namespace Exceler.Configuration
             return this;
         }
 
+        /// <summary>
+        /// Configures a dropdown selection list (Data Validation) for cells in this column using the specified values.
+        /// </summary>
+        /// <param name="options">The array of allowed dropdown values.</param>
+        /// <returns>The current <see cref="ColumnBuilder{TInput, TProperty}"/> instance for fluent chaining.</returns>
+        public ColumnBuilder<TInput, TProperty> WithDropdown(params string[] options)
+        {
+            return WithDropdown((IEnumerable<string>)options);
+        }
+
+        /// <summary>
+        /// Configures a dropdown selection list (Data Validation) for cells in this column with optional settings.
+        /// </summary>
+        /// <param name="options">The collection of allowed dropdown values.</param>
+        /// <param name="configure">An optional delegate to configure alert messages and validation bounds.</param>
+        /// <returns>The current <see cref="ColumnBuilder{TInput, TProperty}"/> instance for fluent chaining.</returns>
+        public ColumnBuilder<TInput, TProperty> WithDropdown(IEnumerable<string> options, Action<DropdownConfiguration>? configure = null)
+        {
+            var config = new DropdownConfiguration(options);
+            configure?.Invoke(config);
+            _style.Dropdown = config;
+            return this;
+        }
+
+        /// <summary>
+        /// Configures a dropdown selection list (Data Validation) automatically populated from the names of a C# <see cref="Enum"/>.
+        /// </summary>
+        /// <typeparam name="TEnum">The enum type whose members represent the allowed choices.</typeparam>
+        /// <param name="configure">An optional delegate to configure alert messages and validation bounds.</param>
+        /// <returns>The current <see cref="ColumnBuilder{TInput, TProperty}"/> instance for fluent chaining.</returns>
+        public ColumnBuilder<TInput, TProperty> WithDropdownFromEnum<TEnum>(Action<DropdownConfiguration>? configure = null) where TEnum : struct, Enum
+        {
+            var names = Enum.GetNames(typeof(TEnum));
+            return WithDropdown(names, configure);
+        }
+
+        /// <summary>
+        /// Applies a conditional style to cells in this column when the column property value satisfies the specified condition.
+        /// </summary>
+        /// <param name="valueCondition">Predicate evaluating the column's property value.</param>
+        /// <param name="configureStyle">Action configuring the visual style overrides when the condition is met.</param>
+        /// <returns>The current <see cref="ColumnBuilder{TInput, TProperty}"/> instance for fluent chaining.</returns>
+        public ColumnBuilder<TInput, TProperty> WithConditionalStyle(
+            Func<TProperty, bool> valueCondition,
+            Action<ColumnStyle> configureStyle)
+        {
+            if (valueCondition == null) throw new ArgumentNullException(nameof(valueCondition));
+            if (configureStyle == null) throw new ArgumentNullException(nameof(configureStyle));
+
+            var getter = _propertySelector.Compile();
+            return WithConditionalStyle(item =>
+            {
+                var val = getter(item);
+                return valueCondition(val);
+            }, configureStyle);
+        }
+
+        /// <summary>
+        /// Applies a conditional style to cells in this column when the entire row model satisfies the specified condition.
+        /// </summary>
+        /// <param name="condition">Predicate evaluating the row data model.</param>
+        /// <param name="configureStyle">Action configuring the visual style overrides when the condition is met.</param>
+        /// <returns>The current <see cref="ColumnBuilder{TInput, TProperty}"/> instance for fluent chaining.</returns>
+        public ColumnBuilder<TInput, TProperty> WithConditionalStyle(
+            Func<TInput, bool> condition,
+            Action<ColumnStyle> configureStyle)
+        {
+            if (condition == null) throw new ArgumentNullException(nameof(condition));
+            if (configureStyle == null) throw new ArgumentNullException(nameof(configureStyle));
+
+            var style = new ColumnStyle();
+            configureStyle(style);
+            _style.ConditionalStyles.Add(new ConditionalStyleRule<TInput>(condition, style));
+            return this;
+        }
+
         /// <inheritdoc />
         void IColumnBuilder<TInput>.Compile(ExcelProfile<TInput> profile)
         {
+            _style.PropertyType = typeof(TProperty);
             profile.RegisterMapping(_propertySelector, _columnIndex, _headerName, _converter, _style);
         }
     }

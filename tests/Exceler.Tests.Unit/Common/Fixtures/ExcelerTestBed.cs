@@ -17,6 +17,7 @@ namespace Exceler.Tests.Common.Fixtures
     public class ExcelerTestBed
     {
         private readonly IServiceCollection _services;
+        private ExcelerEngine _engine = ExcelerEngine.OpenXml;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExcelerTestBed"/> class.
@@ -26,8 +27,18 @@ namespace Exceler.Tests.Common.Fixtures
         {
             _services = new ServiceCollection();
             _services.AddScoped<IExcelReader, DefaultReader>();
-            _services.AddScoped<IExcelWriter, DefaultWriter>();
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+        }
+
+        /// <summary>
+        /// Configures the spreadsheet engine for the test bed (OpenXml or EPPlus).
+        /// </summary>
+        /// <param name="engine">The engine to use.</param>
+        /// <returns>The builder instance for fluent chaining.</returns>
+        public ExcelerTestBed WithEngine(ExcelerEngine engine)
+        {
+            _engine = engine;
+            return this;
         }
 
         /// <summary>
@@ -139,7 +150,19 @@ namespace Exceler.Tests.Common.Fixtures
         /// Builds and returns the underlying configured <see cref="IServiceProvider"/>.
         /// </summary>
         /// <returns>The built service provider.</returns>
-        public IServiceProvider BuildProvider() => _services.BuildServiceProvider();
+        public IServiceProvider BuildProvider()
+        {
+            if (_engine == ExcelerEngine.OpenXml)
+            {
+                _services.AddScoped<IExcelWriter, Exceler.Core.OpenXml.OpenXmlWriterEngine>();
+            }
+            else
+            {
+                _services.AddScoped<IExcelWriter, Exceler.Core.EPPlus.EPPlusWriterEngine>();
+            }
+
+            return _services.BuildServiceProvider();
+        }
 
         /// <summary>
         /// Builds and resolves an <see cref="IExcelReader"/> instance.
@@ -176,24 +199,26 @@ namespace Exceler.Tests.Common.Fixtures
             => Configure().WithProfile(profile).BuildReader();
 
         /// <summary>
-        /// Creates an <see cref="IExcelWriter"/> configured with a single mapping profile type.
+        /// Creates an <see cref="IExcelWriter"/> configured with a single mapping profile type and optional engine.
         /// </summary>
         /// <typeparam name="TModel">The target model type.</typeparam>
         /// <typeparam name="TProfile">The profile type.</typeparam>
+        /// <param name="engine">The engine to use (defaults to OpenXml).</param>
         /// <returns>A pre-configured <see cref="IExcelWriter"/>.</returns>
-        public static IExcelWriter CreateWriter<TModel, TProfile>() 
+        public static IExcelWriter CreateWriter<TModel, TProfile>(ExcelerEngine engine = ExcelerEngine.OpenXml) 
             where TModel : class 
             where TProfile : ExcelProfile<TModel>, new()
-            => Configure().WithProfile<TModel, TProfile>().BuildWriter();
+            => Configure().WithEngine(engine).WithProfile<TModel, TProfile>().BuildWriter();
 
         /// <summary>
-        /// Creates an <see cref="IExcelWriter"/> configured with a specific profile instance.
+        /// Creates an <see cref="IExcelWriter"/> configured with a specific profile instance and optional engine.
         /// </summary>
         /// <typeparam name="TModel">The target model type.</typeparam>
         /// <param name="profile">The profile instance.</param>
+        /// <param name="engine">The engine to use (defaults to OpenXml).</param>
         /// <returns>A pre-configured <see cref="IExcelWriter"/>.</returns>
-        public static IExcelWriter CreateWriter<TModel>(ExcelProfile<TModel> profile) where TModel : class
-            => Configure().WithProfile(profile).BuildWriter();
+        public static IExcelWriter CreateWriter<TModel>(ExcelProfile<TModel> profile, ExcelerEngine engine = ExcelerEngine.OpenXml) where TModel : class
+            => Configure().WithEngine(engine).WithProfile(profile).BuildWriter();
 
         /// <summary>
         /// Creates the default test suite containing assembly scanning of <see cref="TestModelProfile"/>

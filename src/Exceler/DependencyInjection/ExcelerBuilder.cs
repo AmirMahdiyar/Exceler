@@ -20,6 +20,23 @@ namespace Exceler.DependencyInjection
         /// <inheritdoc />
         public OfficeOpenXml.LicenseContext? LicenseContext { get; private set; }
 
+        /// <inheritdoc />
+        public ExcelerEngine SelectedEngine { get; private set; } = ExcelerEngine.OpenXml;
+
+        /// <inheritdoc />
+        public IExcelerBuilder UseOpenXmlEngine()
+        {
+            SelectedEngine = ExcelerEngine.OpenXml;
+            return this;
+        }
+
+        /// <inheritdoc />
+        public IExcelerBuilder UseEPPlusEngine()
+        {
+            SelectedEngine = ExcelerEngine.EPPlus;
+            return this;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ExcelerBuilder"/> class.
         /// </summary>

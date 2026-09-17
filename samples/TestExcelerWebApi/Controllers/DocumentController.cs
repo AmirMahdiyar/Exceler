@@ -1,4 +1,4 @@
-﻿using Exceler.Abstractions;
+using Exceler.Abstractions;
 using Exceler.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.CompilerServices;
@@ -41,14 +41,17 @@ namespace TestExcelerWebApi.Controllers
                 Errors = invalidRows
             });
         }
+        /// <summary>
+        /// Exports document data with configured dropdown validations.
+        /// </summary>
         [HttpGet("export")]
         public async Task<IActionResult> ExportDocuments()
         {
             var fakeData = new List<DocumentExcelInput>
-                {
-                    new DocumentExcelInput { Id = 1, Type = "Receipt", Warehouse = "inventory 1" },
-                    new DocumentExcelInput { Id = 2, Type = "invoice", Warehouse = "inventory 2" }
-                };
+            {
+                new DocumentExcelInput { Id = 1, Type = "Receipt", Warehouse = "Central Hub", Status = "Approved", Number = "REC-001", Description = "First delivery" },
+                new DocumentExcelInput { Id = 2, Type = "Invoice", Warehouse = "South Distribution, Unit 2", Status = "Pending Approval", Number = "INV-105", Description = "Monthly supply" }
+            };
             var memorystream = new MemoryStream();
             await _excelWriter.WriteAsync(fakeData, memorystream);
             memorystream.Position = 0;
@@ -56,14 +59,37 @@ namespace TestExcelerWebApi.Controllers
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 "Documents.xlsx");
         }
+
+        /// <summary>
+        /// Exports an empty data-entry template featuring dropdown validations on Type, Warehouse, and Status.
+        /// </summary>
+        [HttpGet("export-template-with-dropdowns")]
+        public async Task<IActionResult> ExportTemplateWithDropdowns()
+        {
+            var templateData = new List<DocumentExcelInput>
+            {
+                new DocumentExcelInput { Id = 1, Type = "Receipt", Warehouse = "Central Hub", Status = "Draft", Number = "DOC-100", Description = "Sample entry 1" },
+                new DocumentExcelInput { Id = 2, Type = "Invoice", Warehouse = "North Warehouse", Status = "Pending Approval", Number = "DOC-101", Description = "Sample entry 2" }
+            };
+
+            var memoryStream = new MemoryStream();
+            await _excelWriter.WriteAsync(templateData, memoryStream);
+            memoryStream.Position = 0;
+
+            return File(
+                memoryStream,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "Document_Template_With_Dropdowns.xlsx"
+            );
+        }
+
         [HttpGet("exportAsAsyncEnumerable")]
         public async Task ExportDocumentsAsAsyncEnumerable()
         {
             Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            Response.Headers.Add("Content-Disposition", "attachment; filename=Documents.xlsx");
+            Response.Headers.Append("Content-Disposition", "attachment; filename=Documents.xlsx");
 
             var dataStream = GenerateFakeDataStreamAsync();
-
 
             await dataStream.ToExcelAsync(_excelWriter, Response.Body, "Inventory Documents");
         }

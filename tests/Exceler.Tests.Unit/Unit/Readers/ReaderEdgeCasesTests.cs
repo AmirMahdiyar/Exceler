@@ -141,25 +141,24 @@ namespace Exceler.Tests.Unit.Readers
         }
 
         [Fact]
-        public void Registration_without_license_fails_validation()
+        public void Registration_with_epplus_without_license_fails_validation()
         {
             var services = new ServiceCollection();
 
-            var act = () => services.AddExcelCore(_ => { });
+            var act = () => services.AddExcelCore(builder => builder.UseEPPlusEngine());
 
             act.Should().Throw<InvalidOperationException>()
-                .WithMessage("*You MUST explicitly accept the license terms*");
+                .WithMessage("*MUST explicitly accept the license terms*");
         }
 
         [Fact]
-        public void Default_registration_without_license_fails_validation()
+        public void Default_registration_with_openxml_does_not_fail_without_license()
         {
             var services = new ServiceCollection();
 
             var act = () => services.AddExcelCore();
 
-            act.Should().Throw<InvalidOperationException>()
-                .WithMessage("*You MUST explicitly accept the license terms*");
+            act.Should().NotThrow();
         }
 
         private class TransformingReadHandler : ReadHandler<DummyItem, DummyItem>

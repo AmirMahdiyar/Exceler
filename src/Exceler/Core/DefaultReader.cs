@@ -35,6 +35,8 @@ namespace Exceler.Core
         public IEnumerable<ExcelRowResult<TOutput>> Read<TInput, TOutput>(Stream excelStream,
             string? sheetName = null) where TInput : class, new()
         {
+            EnsureLicenseConfigured();
+
             var (profile, processor, asyncProcessor, validator, asyncValidator) = ResolveDependencies<TInput, TOutput>();
             profile.EnsureBuilt();
 
@@ -87,6 +89,8 @@ namespace Exceler.Core
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
             where TInput : class, new()
         {
+            EnsureLicenseConfigured();
+
             var (profile, processor, asyncProcessor, validator, asyncValidator) = ResolveDependencies<TInput, TOutput>();
             profile.EnsureBuilt();
 
@@ -289,6 +293,22 @@ namespace Exceler.Core
                 .SetNext(new ProcessHandler<TInput, TOutput>());
 
             return head;
+        }
+
+        /// <summary>
+        /// Validates that an EPPlus license context has been explicitly configured before proceeding with reader operations.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown when EPPlus license context is not configured.</exception>
+        private void EnsureLicenseConfigured()
+        {
+            var options = _serviceProvider.GetService<ExcelerOptions>();
+            if ((options != null && !options.IsLicenseConfigured) || ExcelPackage.LicenseContext == null)
+            {
+                throw new InvalidOperationException(
+                    "When reading Excel files, an EPPlus license MUST be explicitly configured. " +
+                    "Please call either '.UseNonCommercialLicense()' or '.UseCommercialLicense()' " +
+                    "inside the AddExcelCore configuration builder.");
+            }
         }
 
         #endregion

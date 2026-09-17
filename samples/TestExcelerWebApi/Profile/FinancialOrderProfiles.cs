@@ -27,9 +27,22 @@ namespace TestExcelerWebApi.Profile
             Map(x => x.DeliveryDate).ToColumn(6).WithHeader("Delivery Date");
             Map(x => x.PreferredDeliveryTime).ToColumn(7).WithHeader("Delivery Time");
             Map(x => x.CreatedAtUtc).ToColumn(8).WithHeader("Created (UTC)");
-            Map(x => x.Status).ToColumn(9).WithHeader("Status");
-            Map(x => x.Payment).ToColumn(10).WithHeader("Payment Method");
-            Map(x => x.Priority).ToColumn(11).WithHeader("Priority");
+
+            // Smart Dropdowns: Enum-driven validation lists for import templates
+            Map(x => x.Status)
+                .ToColumn(9)
+                .WithHeader("Status")
+                .WithDropdownFromEnum<OrderStatus>();
+
+            Map(x => x.Payment)
+                .ToColumn(10)
+                .WithHeader("Payment Method")
+                .WithDropdownFromEnum<PaymentMethod>();
+
+            Map(x => x.Priority)
+                .ToColumn(11)
+                .WithHeader("Priority")
+                .WithDropdownFromEnum<PriorityLevel>();
             Map(x => x.Quantity).ToColumn(12).WithHeader("Quantity");
             Map(x => x.UnitPrice).ToColumn(13).WithHeader("Unit Price");
             Map(x => x.DiscountRate).ToColumn(14).WithHeader("Discount Rate");
@@ -60,6 +73,12 @@ namespace TestExcelerWebApi.Profile
             WithAutoFitColumns(false);
             WithTrimStringValues(true);
             WithValidateTemplateOnRead(true);
+
+            // Conditional Style 1: Row-level styling highlighting Urgent orders in soft yellow
+            WithConditionalRowStyle(
+                x => x.Priority == PriorityLevel.Urgent,
+                s => s.WithBackgroundColor(ExcelColor.SoftYellow)
+            );
 
             Map(x => x.TrackingCode)
                 .ToColumn(1)
@@ -112,18 +131,25 @@ namespace TestExcelerWebApi.Profile
                 .ToColumn(9)
                 .WithHeader("Status")
                 .WithWidth(15)
-                .WithBackgroundColor(ExcelColor.SoftBlue);
+                .WithBackgroundColor(ExcelColor.SoftBlue)
+                .WithDropdownFromEnum<OrderStatus>()
+                .WithConditionalStyle(
+                    (OrderStatus s) => s == OrderStatus.Cancelled,
+                    style => style.WithBackgroundColor(ExcelColor.SoftRed).WithFontColor(ExcelColor.DarkRed).SetBold(true)
+                );
 
             Map(x => x.Payment)
                 .ToColumn(10)
                 .WithHeader("Payment Method")
-                .WithWidth(18);
+                .WithWidth(18)
+                .WithDropdownFromEnum<PaymentMethod>();
 
             Map(x => x.Priority)
                 .ToColumn(11)
                 .WithHeader("Priority")
                 .WithWidth(14)
-                .WithBackgroundColor(ExcelColor.SoftYellow);
+                .WithBackgroundColor(ExcelColor.SoftYellow)
+                .WithDropdownFromEnum<PriorityLevel>();
 
             Map(x => x.Quantity)
                 .ToColumn(12)
@@ -185,7 +211,11 @@ namespace TestExcelerWebApi.Profile
                 .WithWidth(16)
                 .IsBold(true)
                 .WithNumberFormat("$#,##0.00")
-                .WithBackgroundColor(ExcelColor.SoftGreen);
+                .WithBackgroundColor(ExcelColor.SoftGreen)
+                .WithConditionalStyle(
+                    (decimal val) => val > 2000m,
+                    style => style.WithBackgroundColor(ExcelColor.DarkGreen).WithFontColor(ExcelColor.White).SetBold(true)
+                );
 
             Map(x => x.IsExpressDelivery)
                 .ToColumn(22)
