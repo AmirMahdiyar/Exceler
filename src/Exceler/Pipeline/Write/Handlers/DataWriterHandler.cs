@@ -1,3 +1,5 @@
+using Exceler.Configuration;
+
 namespace Exceler.Pipeline.Write.Handlers
 {
     /// <summary>
@@ -12,13 +14,15 @@ namespace Exceler.Pipeline.Write.Handlers
             int currentRow = context.Profile.ColumnHeaders.Any() ? 2 : 1;
 
             var gettersArray = context.Profile.CompiledGetters.ToArray();
+            bool hasConditionalStyles = context.Profile.RowConditionalStyles.Count > 0 ||
+                context.Profile.ColumnStyles.Values.Any(s => s.ConditionalStyles.Count > 0);
 
             if (context.AsyncData != null)
                 await foreach (var item in context.AsyncData)
                 {
                     if (item == null) continue;
 
-                    WriteRow(context.Worksheet, currentRow, item, gettersArray);
+                    WriteRow(context.Worksheet, currentRow, item, gettersArray, context, hasConditionalStyles);
                     currentRow++;
                 }
             else if (context.Data != null)
@@ -26,7 +30,7 @@ namespace Exceler.Pipeline.Write.Handlers
                 {
                     if (item == null) continue;
 
-                    WriteRow(context.Worksheet, currentRow, item, gettersArray);
+                    WriteRow(context.Worksheet, currentRow, item, gettersArray, context, hasConditionalStyles);
                     currentRow++;
                 }
 
@@ -43,12 +47,29 @@ namespace Exceler.Pipeline.Write.Handlers
         /// <param name="row">The 1-based row index.</param>
         /// <param name="item">The data model instance to write.</param>
         /// <param name="getters">The array of compiled getters mapped to column indices.</param>
+        /// <param name="context">The write context.</param>
+        /// <param name="hasConditionalStyles">Whether the profile defines any conditional styles.</param>
         private void WriteRow(
             OfficeOpenXml.ExcelWorksheet worksheet,
             int row,
             TModel item,
-            KeyValuePair<int, System.Func<TModel, object>>[] getters)
+            KeyValuePair<int, System.Func<TModel, object>>[] getters,
+            WriteContext<TModel> context,
+            bool hasConditionalStyles)
         {
+            ColumnStyle? matchedRowStyle = null;
+            if (hasConditionalStyles && context.Profile.RowConditionalStyles.Count > 0)
+            {
+                for (int r = 0; r < context.Profile.RowConditionalStyles.Count; r++)
+                {
+                    if (context.Profile.RowConditionalStyles[r].Evaluate(item))
+                    {
+                        matchedRowStyle = context.Profile.RowConditionalStyles[r].Style;
+                        break;
+                    }
+                }
+            }
+
             foreach (var kvp in getters)
             {
                 var columnIndex = kvp.Key;
@@ -77,6 +98,31 @@ namespace Exceler.Pipeline.Write.Handlers
                 else
                 {
                     worksheet.Cells[row, columnIndex].Value = finalValue;
+                }
+
+                if (hasConditionalStyles)
+                {
+                    ColumnStyle? matchedColStyle = null;
+                    if (context.Profile.ColumnStyles.TryGetValue(columnIndex, out var colStyle) && colStyle.ConditionalStyles.Count > 0)
+                    {
+                        for (int c = 0; c < colStyle.ConditionalStyles.Count; c++)
+                        {
+                            if (colStyle.ConditionalStyles[c].Evaluate(item))
+                            {
+                                matchedColStyle = colStyle.ConditionalStyles[c].Style;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (matchedColStyle != null)
+                    {
+                        context.ConditionalOverrides.Add((row, columnIndex, matchedColStyle));
+                    }
+                    else if (matchedRowStyle != null)
+                    {
+                        context.ConditionalOverrides.Add((row, columnIndex, matchedRowStyle));
+                    }
                 }
             }
         }

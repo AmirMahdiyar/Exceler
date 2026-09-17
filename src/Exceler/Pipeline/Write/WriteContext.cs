@@ -24,5 +24,11 @@ namespace Exceler.Pipeline.Write
 
         /// <summary>Gets or sets the total number of rows populated with data. Used by downstream handlers to apply range-specific styles.</summary>
         public int TotalRows { get; set; } = 1;
+
+        /// <summary>
+        /// Gets the collection of conditional style overrides recorded during data row emission.
+        /// Applied by <see cref="Handlers.StyleWriterHandler{TModel}"/> after base column styles.
+        /// </summary>
+        public List<(int Row, int Column, ColumnStyle Style)> ConditionalOverrides { get; } = new();
     }
 }

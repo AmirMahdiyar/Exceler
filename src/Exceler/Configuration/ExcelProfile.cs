@@ -38,6 +38,11 @@ namespace Exceler.Configuration
         internal Dictionary<int, ColumnStyle> ColumnStyles { get; } = new();
 
         /// <summary>
+        /// Gets the collection of registered row-level conditional style rules.
+        /// </summary>
+        internal List<IConditionalStyleRule> RowConditionalStyles { get; } = new();
+
+        /// <summary>
         /// Gets the list of registered column builders before compilation.
         /// </summary>
         internal List<IColumnBuilder<TInput>> Builders { get; } = new();
@@ -107,6 +112,26 @@ namespace Exceler.Configuration
         protected ExcelProfile<TInput> WithValidateTemplateOnRead(bool enabled = true)
         {
             ValidateTemplateOnRead = enabled;
+            return this;
+        }
+
+        /// <summary>
+        /// Configures a conditional style applied to entire rows when the model satisfies the specified condition.
+        /// Evaluated during row streaming; overridden by column-specific conditional styles.
+        /// </summary>
+        /// <param name="condition">Predicate evaluating the row data model.</param>
+        /// <param name="configureStyle">Action configuring the visual style overrides when the condition is met.</param>
+        /// <returns>The current profile instance for fluent chaining.</returns>
+        protected ExcelProfile<TInput> WithConditionalRowStyle(
+            Func<TInput, bool> condition,
+            Action<ColumnStyle> configureStyle)
+        {
+            if (condition == null) throw new ArgumentNullException(nameof(condition));
+            if (configureStyle == null) throw new ArgumentNullException(nameof(configureStyle));
+
+            var style = new ColumnStyle();
+            configureStyle(style);
+            RowConditionalStyles.Add(new ConditionalStyleRule<TInput>(condition, style));
             return this;
         }
 

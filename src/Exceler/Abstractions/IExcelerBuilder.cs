@@ -41,6 +41,27 @@ namespace Exceler.Abstractions
         /// <returns>The current <see cref="IExcelerBuilder"/> instance for chaining.</returns>
         IExcelerBuilder RegisterFromAssemblyContaining<T>();
         /// <summary>
+        /// Gets the currently selected spreadsheet generation engine.
+        /// Defaults to <see cref="ExcelerEngine.OpenXml"/>.
+        /// </summary>
+        ExcelerEngine SelectedEngine { get; }
+
+        /// <summary>
+        /// Configures the Exceler framework to use the ultra-fast, zero-allocation SAX-based OpenXML engine.
+        /// This is the default engine in Exceler v2.0.0 and does not require an EPPlus license.
+        /// </summary>
+        /// <returns>The current <see cref="IExcelerBuilder"/> instance for chaining.</returns>
+        IExcelerBuilder UseOpenXmlEngine();
+
+        /// <summary>
+        /// Configures the Exceler framework to use the EPPlus DOM-based engine.
+        /// Required if you need DOM-dependent features like runtime font-metric column auto-fitting (AutoFitColumns).
+        /// When using EPPlus, you MUST configure an EPPlus license via <see cref="UseNonCommercialLicense"/> or <see cref="UseCommercialLicense"/>.
+        /// </summary>
+        /// <returns>The current <see cref="IExcelerBuilder"/> instance for chaining.</returns>
+        IExcelerBuilder UseEPPlusEngine();
+
+        /// <summary>
         /// Configures the Exceler framework to use the EPPlus Non-Commercial license.
         /// </summary>
         /// <remarks>

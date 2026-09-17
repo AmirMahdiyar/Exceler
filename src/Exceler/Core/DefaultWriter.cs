@@ -105,6 +105,7 @@ namespace Exceler.Core
 
             head.SetNext(new DataWriterHandler<TModel>())
                 .SetNext(new StyleWriterHandler<TModel>())
+                .SetNext(new DataValidationWriterHandler<TModel>())
                 .SetNext(new FormattingWriterHandler<TModel>());
 
             return head;

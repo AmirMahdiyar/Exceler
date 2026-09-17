@@ -46,6 +46,32 @@ namespace Exceler.Pipeline.Write.Handlers
                 }
             }
 
+            // Apply dynamic conditional style overrides on top of base styles
+            if (context.ConditionalOverrides.Count > 0)
+            {
+                foreach (var (row, col, style) in context.ConditionalOverrides)
+                {
+                    var cell = context.Worksheet.Cells[row, col];
+
+                    if (style.IsBold)
+                        cell.Style.Font.Bold = true;
+
+                    if (!string.IsNullOrEmpty(style.NumberFormat))
+                        cell.Style.Numberformat.Format = style.NumberFormat;
+
+                    if (!string.IsNullOrEmpty(style.BackgroundColorHex))
+                    {
+                        cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        cell.Style.Fill.BackgroundColor.SetColor(Exceler.Core.ColorHelper.FromHex(style.BackgroundColorHex));
+                    }
+
+                    if (!string.IsNullOrEmpty(style.FontColorHex))
+                    {
+                        cell.Style.Font.Color.SetColor(Exceler.Core.ColorHelper.FromHex(style.FontColorHex));
+                    }
+                }
+            }
+
             if (Next is not null)
                 await Next.HandleAsync(context);
         }
