@@ -8,37 +8,7 @@
 [![Downloads](https://img.shields.io/nuget/dt/Exceler.svg?style=flat-square&color=green)](https://www.nuget.org/packages/Exceler)
 [![Framework](https://img.shields.io/badge/.NET-6.0%20%7C%207.0%20%7C%208.0%20%7C%209.0-purple.svg?style=flat-square)](#)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-346%20Passed%20(100%25)-brightgreen.svg?style=flat-square)](#)
-[![Coverage](https://img.shields.io/badge/Coverage-98%25%20Line%20%7C%2094%25%20Branch-success.svg?style=flat-square)](#)
-
-An ultra-fast, modern, and memory-efficient spreadsheet processing framework for **.NET 6, 7, 8, and 9**. Featuring a **Dual-Engine Architecture (OpenXML SAX & EPPlus)**, Exceler enables streaming **millions of rows with true $O(1)$ flat memory consumption** without ever crashing your server with `OutOfMemoryException`.
-
----
-
-## 🌟 What's New in v2.0.0?
-
-Exceler v2.0.0 is a groundbreaking release introducing industrial-grade streaming and enterprise data entry capabilities:
-
-*   ⚡ **High-Performance OpenXML SAX Engine ($O(1)$ Memory):** Stream millions of records directly into raw OpenXML forward-only streams with flat, minimal RAM consumption. Completely eliminates in-memory DOM allocations and runs under the permissive **MIT License** with zero commercial license restrictions.
-*   📋 **Smart Dropdowns (Data Validation):** Seamlessly configure Excel interactive dropdown pickers directly from C# Enums or string collections. Features intelligent **dual-routing**: short lists are inlined, while long lists or choices containing commas are automatically routed to a hidden `_ValidationData` reference worksheet positioned as the **last worksheet** in the workbook (leaving your data sheet as Sheet 1).
-*   🎨 **Pure C#-Based Conditional Styling:** Highlight rows and cells at write-time using strongly-typed C# Lambda expressions (`val => val > 1500m`, `order => order.Status == OrderStatus.Cancelled`). Supports row-level and column-level rules, cascading precedence, and strict number format preservation (currency and dates never reset to General!).
-*   🏗️ **Clean Architecture & Design Patterns:** Fully refactored into decoupled, single-responsibility components utilizing **Facade**, **Builder**, **Strategy/Streamer**, and **Coordinator** patterns adhering strictly to the ECMA-376 schema specification.
-*   🧪 **Enterprise-Grade Quality:** Backed by **346 automated tests (100% passing in ~1s)**, boasting **98% Line Coverage** and **94% Branch Coverage** with zero compiler warnings across all target frameworks.
-
----
-
-## 📊 Memory Benchmark: Exporting Millions of Rows with Zero Crashes
-
-Traditional .NET spreadsheet libraries (EPPlus, ClosedXML) construct an in-memory Document Object Model (DOM) of the entire workbook. When exporting hundreds of thousands or millions of records, RAM consumption skyrockets into gigabytes until the process terminates with `OutOfMemoryException`.
-
-**Exceler's OpenXML SAX Engine streams data row-by-row in forward-only XML streams ($O(1)$ memory complexity):**
-
-| Record Count | Traditional DOM Memory | Exceler OpenXML SAX Memory | Memory Savings | OutOfMemory Risk |
-| :---: | :---: | :---: | :---: | :---: |
-| **10,000 rows** | ~180 MB | **~15 MB** | **91% less RAM** | None |
-| **50,000 rows** | ~650 MB | **~17 MB** | **97% less RAM** | Low |
-| **250,000 rows** | ~2.2 GB *(High GC Pressure)* | **~19 MB** (Flat!) | **99% less RAM** | High |
-| **1,000,000+ rows** | 💥 **CRASH (`OutOfMemoryException`)** | **~22 MB** (Flat!) | **Eliminated!** | **Zero Crash Guaranteed** |
+[![codecov](https://codecov.io/gh/AmirMahdiyar/Exceler/graph/badge.svg?token=YOUR_TOKEN)](https://codecov.io/gh/AmirMahdiyar/Exceler)
 
 > 💡 **Enterprise Guarantee:** With Exceler's OpenXML engine, your background export jobs and API microservices maintain a flat, predictable memory profile regardless of whether you export 500 rows or 2,000,000 rows.
 
@@ -363,7 +333,7 @@ public async Task<IActionResult> ExportDatabaseStream(
 
 Exceler is built for mission-critical enterprise workloads with zero tolerance for failure:
 
-*   **100% Passing Automated Tests:** 343 unit and integration tests executing in ~1 second.
+*   **100% Passing Automated Tests:** 346 unit and integration tests executing in ~1 second.
 *   **98% Line Coverage & 94% Branch Coverage:** Exhaustively tested edge cases across all target frameworks.
 *   **ECMA-376 Schema Compliance:** Ensures strict OpenXML XML element sequencing (`sheetViews` $\rightarrow$ `cols` $\rightarrow$ `sheetData` $\rightarrow$ `dataValidations`), preventing "workbook needs repair" dialogs in Excel.
 *   **Bulletproof Exception Handling:** Robust parsing of corrupt values, formula evaluation fallbacks, safe type casting, and template mismatch detection.
